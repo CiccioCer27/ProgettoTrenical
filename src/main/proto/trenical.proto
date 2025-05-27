@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "grpc";
+option java_outer_classname = "TrenicalProto";
+
+message PromozioneGrpc {
+    string nome = 1;
+    string descrizione = 2;
+    string dataInizio = 3;
+    string dataFine = 4;
+}
+
+message RichiestaPromozioni {}
+
+message RichiestaGrpc {
+    string tipo = 1;
+    string idCliente = 2;
+    string messaggioExtra = 3;
+}
+
+message RispostaGrpc {
+    string esito = 1;
+    string messaggio = 2;
+}
+message IscrizioneNotificheGrpc {
+    string emailCliente = 1;
+    string trattaId = 2;
+}
+
+message NotificaTrattaGrpc {
+    string messaggio = 1;
+}
+
+service TrenicalService {
+    rpc inviaRichiesta(RichiestaGrpc) returns (RispostaGrpc);
+    rpc streamPromozioni(RichiestaPromozioni) returns (stream PromozioneGrpc);
+    rpc streamNotificheTratta(IscrizioneNotificheGrpc) returns (stream NotificaTrattaGrpc);
+
+}
