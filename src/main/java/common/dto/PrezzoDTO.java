@@ -1,11 +1,11 @@
 package dto;
 
-public class Prezzo {
+public class PrezzoDTO {
     private final double prezzoIntero;
     private final double prezzoPromo;
     private final double prezzoFedelta;
 
-    public Prezzo(double prezzoIntero, double prezzoPromo, double prezzoFedelta) {
+    public PrezzoDTO(double prezzoIntero, double prezzoPromo, double prezzoFedelta) {
         this.prezzoIntero = prezzoIntero;
         this.prezzoPromo = prezzoPromo;
         this.prezzoFedelta = prezzoFedelta;
@@ -17,7 +17,7 @@ public class Prezzo {
 
     @Override
     public String toString() {
-        return "Prezzo{" +
+        return "PrezzoDTO{" +
                 "prezzoIntero=" + prezzoIntero +
                 ", prezzoPromo=" + prezzoPromo +
                 ", prezzoFedelta=" + prezzoFedelta +

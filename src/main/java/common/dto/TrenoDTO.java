@@ -2,6 +2,7 @@ package dto;
 
 import java.util.UUID;
 
+// DTO per la comunicazione tra client e server (immutabile)
 public class TrenoDTO {
     private final UUID id;
     private final int numero;
@@ -39,20 +40,4 @@ public class TrenoDTO {
     public String getServiziRistorazione() { return serviziRistorazione; }
     public boolean isAccessibileDisabili() { return accessibileDisabili; }
     public String getNomeCommerciale() { return nomeCommerciale; }
-
-    @Override
-    public String toString() {
-        return "TrenoDTO{" +
-                "id=" + id +
-                ", numero=" + numero +
-                ", tipologia='" + tipologia + '\'' +
-                ", capienzaTotale=" + capienzaTotale +
-                ", wifiDisponibile=" + wifiDisponibile +
-                ", preseElettriche=" + preseElettriche +
-                ", ariaCondizionata=" + ariaCondizionata +
-                ", serviziRistorazione='" + serviziRistorazione + '\'' +
-                ", accessibileDisabili=" + accessibileDisabili +
-                ", nomeCommerciale='" + nomeCommerciale + '\'' +
-                '}';
-    }
 }
