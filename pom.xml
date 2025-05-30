@@ -16,6 +16,8 @@
         <grpc.version>1.58.0</grpc.version>
         <protobuf.version>3.25.1</protobuf.version>
         <jackson.version>2.15.2</jackson.version>
+        <javafx.version>21.0.1</javafx.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     </properties>
 
     <dependencies>
@@ -68,6 +70,28 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- ✅ JavaFX Dependencies (AGGIORNATE) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
 
         <!-- ✅ Guava (per @VisibleForTesting e utility varie) -->
@@ -124,18 +148,6 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>5.5.0</version>
             <scope>test</scope>
-        </dependency>
-
-        <!-- ✅ JavaFX (opzionale se usi GUI) -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>21.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>21.0.1</version>
         </dependency>
 
         <!-- ✅ Logging -->
@@ -195,6 +207,31 @@
                 </executions>
             </plugin>
 
+            <!-- ✅ JavaFX Maven Plugin -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx.maven.plugin.version}</version>
+                <configuration>
+                    <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <configuration>
+                            <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>debug</id>
+                        <configuration>
+                            <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                            <commandlineArgs>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:8000</commandlineArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- ✅ Surefire Plugin per JUnit 5 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -233,6 +270,36 @@
                 <configuration>
                     <mainClass>test.IntegrationTestMain</mainClass>
                 </configuration>
+                <executions>
+                    <!-- Configurazione per Swing -->
+                    <execution>
+                        <id>swing-gui</id>
+                        <configuration>
+                            <mainClass>gui.swing.TrenicalSwingDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Configurazione per JavaFX -->
+                    <execution>
+                        <id>javafx-gui</id>
+                        <configuration>
+                            <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Configurazione per Server -->
+                    <execution>
+                        <id>server</id>
+                        <configuration>
+                            <mainClass>main.ServerMain</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Configurazione per Test Client -->
+                    <execution>
+                        <id>test-client</id>
+                        <configuration>
+                            <mainClass>test.SimpleClientTest</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -254,6 +321,45 @@
             <properties>
                 <log.level>INFO</log.level>
             </properties>
+        </profile>
+
+        <!-- ✅ Profile per JavaFX -->
+        <profile>
+            <id>javafx</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <version>${javafx.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>default-cli</id>
+                                <configuration>
+                                    <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ✅ Profile per GUI testing -->
+        <profile>
+            <id>gui-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <configuration>
+                            <mainClass>gui.swing.TrenicalSwingDemo</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
