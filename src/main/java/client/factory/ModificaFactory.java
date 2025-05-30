@@ -26,7 +26,7 @@ public class ModificaFactory implements RichiestaFactory {
         return new RichiestaDTO.Builder()
                 .tipo("MODIFICA")
                 .idCliente(idCliente)
-                .bigliettoOriginale(bigliettoOriginale)
+                .biglietto(bigliettoOriginale)
                 .tratta(nuovaTratta)
                 .classeServizio(nuovaClasse)
                 .tipoPrezzo(tipoPrezzo)

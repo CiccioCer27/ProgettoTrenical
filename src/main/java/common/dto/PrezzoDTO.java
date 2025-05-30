@@ -11,9 +11,17 @@ public class PrezzoDTO {
         this.prezzoFedelta = prezzoFedelta;
     }
 
-    public double getPrezzoIntero() { return prezzoIntero; }
-    public double getPrezzoPromo() { return prezzoPromo; }
-    public double getPrezzoFedelta() { return prezzoFedelta; }
+    public double getPrezzoIntero() {
+        return prezzoIntero;
+    }
+
+    public double getPrezzoPromo() {
+        return prezzoPromo;
+    }
+
+    public double getPrezzoFedelta() {
+        return prezzoFedelta;
+    }
 
     @Override
     public String toString() {

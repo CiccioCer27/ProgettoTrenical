@@ -1,0 +1,21 @@
+// src/main/proto/banca.proto
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "banca.grpc";
+option java_outer_classname = "BancaProto";
+
+message RichiestaPagamento {
+    string idCliente = 1;
+    double importo = 2;
+    string causale = 3;
+}
+
+message RispostaPagamento {
+    bool successo = 1;
+    string messaggio = 2;
+}
+
+service BancaService {
+    rpc paga(RichiestaPagamento) returns (RispostaPagamento);
+}

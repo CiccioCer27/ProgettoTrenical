@@ -15,7 +15,7 @@
     </properties>
 
     <dependencies>
-        <!-- gRPC -->
+        <!-- ✅ gRPC -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
@@ -37,14 +37,43 @@
             <version>3.23.1</version>
         </dependency>
 
-        <!-- ✅ javax.annotation to fix Generated symbol -->
+        <!-- ✅ Jackson per JSON -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.2</version>
+        </dependency>
+
+        <!-- ✅ Guava (per @VisibleForTesting e utility varie) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.1.2-jre</version>
+        </dependency>
+
+        <!-- ✅ javax.annotation -->
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
         </dependency>
 
-        <!-- JUnit 5 -->
+        <!-- ✅ JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -52,7 +81,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JavaFX -->
+        <!-- ✅ JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -75,7 +104,7 @@
         </extensions>
 
         <plugins>
-            <!-- gRPC + Protobuf compiler plugin -->
+            <!-- ✅ gRPC + Protobuf -->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>

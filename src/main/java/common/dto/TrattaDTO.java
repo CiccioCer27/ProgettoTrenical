@@ -1,12 +1,14 @@
 package dto;
 
+import enums.ClasseServizio;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.UUID;
-import enums.ClasseServizio;
 
 public class TrattaDTO {
+
     private final UUID id;
     private final String stazionePartenza;
     private final String stazioneArrivo;
@@ -14,25 +16,11 @@ public class TrattaDTO {
     private final LocalTime ora;
     private final int binario;
     private final TrenoDTO treno;
-    private final Map<ClasseServizio, Prezzo> prezzi;
-
-    @Override
-    public String toString() {
-        return "TrattaDTO{" +
-                "id=" + id +
-                ", stazionePartenza='" + stazionePartenza + '\'' +
-                ", stazioneArrivo='" + stazioneArrivo + '\'' +
-                ", data=" + data +
-                ", ora=" + ora +
-                ", binario=" + binario +
-                ", treno=" + treno +
-                ", prezzi=" + prezzi +
-                '}';
-    }
+    private final Map<ClasseServizio, PrezzoDTO> prezzi;
 
     public TrattaDTO(UUID id, String stazionePartenza, String stazioneArrivo,
                      LocalDate data, LocalTime ora, int binario,
-                     TrenoDTO treno, Map<ClasseServizio,Prezzo> prezzi) {
+                     TrenoDTO treno, Map<ClasseServizio, PrezzoDTO> prezzi) {
         this.id = id;
         this.stazionePartenza = stazionePartenza;
         this.stazioneArrivo = stazioneArrivo;
@@ -50,5 +38,19 @@ public class TrattaDTO {
     public LocalTime getOra() { return ora; }
     public int getBinario() { return binario; }
     public TrenoDTO getTreno() { return treno; }
-    public Map<ClasseServizio, Prezzo> getPrezzi() { return prezzi; }
+    public Map<ClasseServizio, PrezzoDTO> getPrezzi() { return prezzi; }
+
+    @Override
+    public String toString() {
+        return "TrattaDTO{" +
+                "id=" + id +
+                ", stazionePartenza='" + stazionePartenza + '\'' +
+                ", stazioneArrivo='" + stazioneArrivo + '\'' +
+                ", data=" + data +
+                ", ora=" + ora +
+                ", binario=" + binario +
+                ", treno=" + treno +
+                ", prezzi=" + prezzi +
+                '}';
+    }
 }

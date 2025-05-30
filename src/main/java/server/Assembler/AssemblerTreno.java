@@ -5,7 +5,6 @@ import model.Treno;
 
 public class AssemblerTreno {
 
-    // Converte da Treno a TrenoDTO
     public static TrenoDTO toDTO(Treno treno) {
         return new TrenoDTO(
                 treno.getId(),
@@ -21,10 +20,9 @@ public class AssemblerTreno {
         );
     }
 
-    // Converte da TrenoDTO a Treno (usando il Builder)
     public static Treno fromDTO(TrenoDTO dto) {
         return new Treno.Builder()
-                .withId(dto.getId())
+                .id(dto.getId())
                 .numero(dto.getNumero())
                 .tipologia(dto.getTipologia())
                 .capienzaTotale(dto.getCapienzaTotale())

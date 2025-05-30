@@ -16,13 +16,53 @@ message RichiestaPromozioni {}
 message RichiestaGrpc {
     string tipo = 1;
     string idCliente = 2;
-    string messaggioExtra = 3;
+
+    // Informazioni su tratta e biglietto
+    string trattaId = 3;
+    string bigliettoId = 4;
+
+    // Parametri per filtraggio o info extra
+    string messaggioExtra = 5;
+    string classeServizio = 6;
+    string tipoPrezzo = 7;
+    double penale = 8;
+
+    // Parametri per ricerca
+    string data = 9;
+    string partenza = 10;
+    string arrivo = 11;
+    string tipoTreno = 12;
+    string fasciaOraria = 13;
+}
+
+message BigliettoGrpc {
+    string id = 1;
+    string idCliente = 2;
+    string idTratta = 3;
+    string classe = 4;
+    string tipoAcquisto = 5;
+    double prezzoPagato = 6;
+    string dataAcquisto = 7;
+    bool conCartaFedelta = 8;
+}
+
+message TrattaGrpc {
+    string id = 1;
+    string stazionePartenza = 2;
+    string stazioneArrivo = 3;
+    string data = 4;
+    string ora = 5;
+    string binario = 6;
+    string tipoTreno = 7;
 }
 
 message RispostaGrpc {
     string esito = 1;
     string messaggio = 2;
+    optional BigliettoGrpc biglietto = 3;
+    repeated TrattaGrpc tratte = 4;
 }
+
 message IscrizioneNotificheGrpc {
     string emailCliente = 1;
     string trattaId = 2;
@@ -36,5 +76,4 @@ service TrenicalService {
     rpc inviaRichiesta(RichiestaGrpc) returns (RispostaGrpc);
     rpc streamPromozioni(RichiestaPromozioni) returns (stream PromozioneGrpc);
     rpc streamNotificheTratta(IscrizioneNotificheGrpc) returns (stream NotificaTrattaGrpc);
-
 }

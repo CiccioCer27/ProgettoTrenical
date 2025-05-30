@@ -1,0 +1,12 @@
+package eventi;
+
+public enum TipoEvento {
+    MODIFICA_TRATTA,
+    PROMO_FEDELTA,
+    PROMO_GENERALE,
+    PROMO_TRATTA,
+    GDS_ACQUISTO,
+    GDS_PRENOTAT,
+    GDS_MODIFICA,
+    ACQUISTO_CARTA_FEDELTA
+}

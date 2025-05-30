@@ -1,7 +1,11 @@
 package model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
 import java.util.UUID;
 
+@JsonDeserialize(builder = Treno.Builder.class)
 public class Treno {
 
     private final UUID id;
@@ -28,48 +32,20 @@ public class Treno {
         this.nomeCommerciale = builder.nomeCommerciale;
     }
 
-    public UUID getId() {
-        return id;
-    }
+    public UUID getId() { return id; }
+    public int getNumero() { return numero; }
+    public String getTipologia() { return tipologia; }
+    public int getCapienzaTotale() { return capienzaTotale; }
+    public boolean isWifiDisponibile() { return wifiDisponibile; }
+    public boolean isPreseElettriche() { return preseElettriche; }
+    public boolean isAriaCondizionata() { return ariaCondizionata; }
+    public String getServiziRistorazione() { return serviziRistorazione; }
+    public boolean isAccessibileDisabili() { return accessibileDisabili; }
+    public String getNomeCommerciale() { return nomeCommerciale; }
 
-    public int getNumero() {
-        return numero;
-    }
-
-    public String getTipologia() {
-        return tipologia;
-    }
-
-    public int getCapienzaTotale() {
-        return capienzaTotale;
-    }
-
-    public boolean isWifiDisponibile() {
-        return wifiDisponibile;
-    }
-
-    public boolean isPreseElettriche() {
-        return preseElettriche;
-    }
-
-    public boolean isAriaCondizionata() {
-        return ariaCondizionata;
-    }
-
-    public String getServiziRistorazione() {
-        return serviziRistorazione;
-    }
-
-    public boolean isAccessibileDisabili() {
-        return accessibileDisabili;
-    }
-
-    public String getNomeCommerciale() {
-        return nomeCommerciale;
-    }
-
+    @JsonPOJOBuilder(withPrefix = "")
     public static class Builder {
-        private UUID id = UUID.randomUUID(); // Genera ID automatico
+        private UUID id = UUID.randomUUID();
         private int numero;
         private String tipologia;
         private int capienzaTotale;
@@ -80,58 +56,17 @@ public class Treno {
         private boolean accessibileDisabili;
         private String nomeCommerciale;
 
-        public Builder numero(int numero) {
-            this.numero = numero;
-            return this;
-        }
+        public Builder id(UUID id) { this.id = id; return this; }
+        public Builder numero(int numero) { this.numero = numero; return this; }
+        public Builder tipologia(String tipologia) { this.tipologia = tipologia; return this; }
+        public Builder capienzaTotale(int capienzaTotale) { this.capienzaTotale = capienzaTotale; return this; }
+        public Builder wifiDisponibile(boolean wifiDisponibile) { this.wifiDisponibile = wifiDisponibile; return this; }
+        public Builder preseElettriche(boolean preseElettriche) { this.preseElettriche = preseElettriche; return this; }
+        public Builder ariaCondizionata(boolean ariaCondizionata) { this.ariaCondizionata = ariaCondizionata; return this; }
+        public Builder serviziRistorazione(String serviziRistorazione) { this.serviziRistorazione = serviziRistorazione; return this; }
+        public Builder accessibileDisabili(boolean accessibileDisabili) { this.accessibileDisabili = accessibileDisabili; return this; }
+        public Builder nomeCommerciale(String nomeCommerciale) { this.nomeCommerciale = nomeCommerciale; return this; }
 
-        public Builder tipologia(String tipologia) {
-            this.tipologia = tipologia;
-            return this;
-        }
-
-        public Builder capienzaTotale(int capienzaTotale) {
-            this.capienzaTotale = capienzaTotale;
-            return this;
-        }
-
-        public Builder wifiDisponibile(boolean wifiDisponibile) {
-            this.wifiDisponibile = wifiDisponibile;
-            return this;
-        }
-
-        public Builder preseElettriche(boolean preseElettriche) {
-            this.preseElettriche = preseElettriche;
-            return this;
-        }
-
-        public Builder ariaCondizionata(boolean ariaCondizionata) {
-            this.ariaCondizionata = ariaCondizionata;
-            return this;
-        }
-
-        public Builder serviziRistorazione(String serviziRistorazione) {
-            this.serviziRistorazione = serviziRistorazione;
-            return this;
-        }
-
-        public Builder accessibileDisabili(boolean accessibileDisabili) {
-            this.accessibileDisabili = accessibileDisabili;
-            return this;
-        }
-
-        public Builder nomeCommerciale(String nomeCommerciale) {
-            this.nomeCommerciale = nomeCommerciale;
-            return this;
-        }
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Treno build() {
-            return new Treno(this);
-        }
+        public Treno build() { return new Treno(this); }
     }
 }

@@ -5,57 +5,66 @@ import enums.ClasseServizio;
 import enums.TipoPrezzo;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 public class AssemblerRichiesta {
 
-    public static RichiestaDTO buildAcquisto(String idCliente, TrattaDTO tratta,
-                                             ClasseServizio classeServizio, TipoPrezzo tipoPrezzo) {
-        RichiestaAcquistoDTO payload = new RichiestaAcquistoDTO(tratta, classeServizio, tipoPrezzo, idCliente.toString());
+    public static RichiestaDTO creaAcquisto(String idCliente, TrattaDTO tratta, ClasseServizio classe, TipoPrezzo tipoPrezzo) {
         return new RichiestaDTO.Builder()
                 .tipo("ACQUISTA")
                 .idCliente(idCliente)
-                .payload(payload)
+                .tratta(tratta)
+                .classeServizio(classe)
+                .tipoPrezzo(tipoPrezzo)
                 .build();
     }
 
-    public static RichiestaDTO buildPrenotazione(String idCliente, TrattaDTO tratta,
-                                                 ClasseServizio classeServizio) {
-        RichiestaPrenotazioneDTO payload = new RichiestaPrenotazioneDTO(tratta, classeServizio, idCliente.toString());
+    public static RichiestaDTO creaPrenotazione(String idCliente, TrattaDTO tratta, ClasseServizio classe) {
         return new RichiestaDTO.Builder()
                 .tipo("PRENOTA")
                 .idCliente(idCliente)
-                .payload(payload)
+                .tratta(tratta)
+                .classeServizio(classe)
                 .build();
     }
 
-    public static RichiestaDTO buildModifica(String idCliente, BigliettoDTO bigliettoOriginale,
-                                             TrattaDTO nuovaTratta, ClasseServizio nuovaClasse, TipoPrezzo tipoPrezzo) {
-        RichiestaModificaDTO payload = new RichiestaModificaDTO(
-                bigliettoOriginale, nuovaTratta, nuovaClasse, tipoPrezzo, idCliente.toString()
-        );
+    public static RichiestaDTO creaModifica(String idCliente, BigliettoDTO bigliettoVecchio, TrattaDTO nuovaTratta,
+                                            ClasseServizio nuovaClasse, TipoPrezzo tipoPrezzo, double penale) {
         return new RichiestaDTO.Builder()
                 .tipo("MODIFICA")
                 .idCliente(idCliente)
-                .payload(payload)
+                .biglietto(bigliettoVecchio)
+                .tratta(nuovaTratta)
+                .classeServizio(nuovaClasse)
+                .tipoPrezzo(tipoPrezzo)
+                .penale(penale)
                 .build();
     }
 
-    public static RichiestaDTO buildRichiestaFedelta(String idCliente) {
-        RichiestaCartaFedeltaDTO payload = new RichiestaCartaFedeltaDTO(idCliente.toString());
+    public static RichiestaDTO creaConferma(String idCliente, BigliettoDTO bigliettoPrenotato) {
+        return new RichiestaDTO.Builder()
+                .tipo("CONFERMA")
+                .idCliente(idCliente)
+                .biglietto(bigliettoPrenotato)
+                .build();
+    }
+
+    public static RichiestaDTO creaCartaFedelta(String idCliente) {
         return new RichiestaDTO.Builder()
                 .tipo("CARTA_FEDELTA")
                 .idCliente(idCliente)
-                .payload(payload)
                 .build();
     }
 
-    public static RichiestaDTO buildRichiestaTratte(LocalDate data, String fascia, String partenza,
-                                                    String arrivo, String tipoTreno, ClasseServizio classe) {
-        RichiestaTratteDTO payload = new RichiestaTratteDTO(data, fascia, partenza, arrivo, tipoTreno, classe);
+    public static RichiestaDTO creaRicercaTratte(LocalDate data, String partenza, String arrivo,
+                                                 String tipoTreno, ClasseServizio classe, String fascia) {
         return new RichiestaDTO.Builder()
                 .tipo("RICERCA_TRATTE")
-                .payload(payload)
+                .data(data)
+                .partenza(partenza)
+                .arrivo(arrivo)
+                .tipoTreno(tipoTreno)
+                .classeServizio(classe)
+                .fasciaOraria(fascia)
                 .build();
     }
 }

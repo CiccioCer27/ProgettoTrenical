@@ -1,4 +1,4 @@
-package dto;
+ package dto;
 
 public class RispostaDTO {
 
@@ -38,4 +38,4 @@ public class RispostaDTO {
         }
         return null;
     }
-}
+} 
