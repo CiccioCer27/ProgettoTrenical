@@ -6,7 +6,6 @@ import enums.StatoBiglietto;
 import enums.TipoPrezzo;
 import grpc.*;
 import model.Biglietto;
-import model.Tratta;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,20 +17,101 @@ public class GrpcMapper {
 
     // 🔁 RichiestaDTO ➜ RichiestaGrpc
     public static RichiestaGrpc toGrpc(RichiestaDTO dto) {
-        return RichiestaGrpc.newBuilder()
+        RichiestaGrpc.Builder builder = RichiestaGrpc.newBuilder()
                 .setTipo(dto.getTipo())
-                .setIdCliente(dto.getIdCliente())
-                .setMessaggioExtra(dto.getMessaggioExtra() != null ? dto.getMessaggioExtra() : "")
-                .build();
+                .setIdCliente(dto.getIdCliente() != null ? dto.getIdCliente() : "")
+                .setMessaggioExtra(dto.getMessaggioExtra() != null ? dto.getMessaggioExtra() : "");
+
+        // ✅ Aggiungi mappings mancanti
+        if (dto.getTratta() != null) {
+            builder.setTrattaId(dto.getTratta().getId().toString());
+        }
+        if (dto.getBiglietto() != null) {
+            builder.setBigliettoId(dto.getBiglietto().getId().toString());
+        }
+        if (dto.getClasseServizio() != null) {
+            builder.setClasseServizio(dto.getClasseServizio().name());
+        }
+        if (dto.getTipoPrezzo() != null) {
+            builder.setTipoPrezzo(dto.getTipoPrezzo().name());
+        }
+        if (dto.getPenale() != null) {
+            builder.setPenale(dto.getPenale());
+        }
+        if (dto.getData() != null) {
+            builder.setData(dto.getData().toString());
+        }
+        if (dto.getPartenza() != null) {
+            builder.setPartenza(dto.getPartenza());
+        }
+        if (dto.getArrivo() != null) {
+            builder.setArrivo(dto.getArrivo());
+        }
+        if (dto.getTipoTreno() != null) {
+            builder.setTipoTreno(dto.getTipoTreno());
+        }
+        if (dto.getFasciaOraria() != null) {
+            builder.setFasciaOraria(dto.getFasciaOraria());
+        }
+
+        return builder.build();
     }
 
     // 🔁 RichiestaGrpc ➜ RichiestaDTO
     public static RichiestaDTO toDTO(RichiestaGrpc grpc) {
-        return new RichiestaDTO.Builder()
+        RichiestaDTO.Builder builder = new RichiestaDTO.Builder()
                 .tipo(grpc.getTipo())
-                .idCliente(grpc.getIdCliente())
-                .messaggioExtra(grpc.getMessaggioExtra())
-                .build();
+                .idCliente(grpc.getIdCliente().isEmpty() ? null : grpc.getIdCliente())
+                .messaggioExtra(grpc.getMessaggioExtra().isEmpty() ? null : grpc.getMessaggioExtra());
+
+        // ✅ Gestisci TrattaId -> TrattaDTO (minimale per ID)
+        if (!grpc.getTrattaId().isEmpty()) {
+            TrattaDTO trattaMinimale = new TrattaDTO(
+                    UUID.fromString(grpc.getTrattaId()),
+                    "", "", null, null, 0, null, null
+            );
+            builder.tratta(trattaMinimale);
+        }
+
+        // ✅ Gestisci BigliettoId -> BigliettoDTO (minimale per ID)
+        if (!grpc.getBigliettoId().isEmpty()) {
+            BigliettoDTO bigliettoMinimale = new BigliettoDTO(
+                    UUID.fromString(grpc.getBigliettoId()),
+                    null, null, null, null, 0.0, null
+            );
+            builder.biglietto(bigliettoMinimale);
+        }
+
+        // ✅ Gestisci campi opzionali con valori di default
+        if (!grpc.getClasseServizio().isEmpty()) {
+            builder.classeServizio(ClasseServizio.valueOf(grpc.getClasseServizio()));
+        }
+        if (!grpc.getTipoPrezzo().isEmpty()) {
+            builder.tipoPrezzo(TipoPrezzo.valueOf(grpc.getTipoPrezzo()));
+        } else {
+            // Default per prenotazioni che non specificano il tipo prezzo
+            builder.tipoPrezzo(TipoPrezzo.INTERO);
+        }
+        if (grpc.getPenale() > 0) {
+            builder.penale(grpc.getPenale());
+        }
+        if (!grpc.getData().isEmpty()) {
+            builder.data(LocalDate.parse(grpc.getData()));
+        }
+        if (!grpc.getPartenza().isEmpty()) {
+            builder.partenza(grpc.getPartenza());
+        }
+        if (!grpc.getArrivo().isEmpty()) {
+            builder.arrivo(grpc.getArrivo());
+        }
+        if (!grpc.getTipoTreno().isEmpty()) {
+            builder.tipoTreno(grpc.getTipoTreno());
+        }
+        if (!grpc.getFasciaOraria().isEmpty()) {
+            builder.fasciaOraria(grpc.getFasciaOraria());
+        }
+
+        return builder.build();
     }
 
     // 🔁 RispostaDTO ➜ RispostaGrpc
@@ -84,8 +164,9 @@ public class GrpcMapper {
                 .build();
     }
 
-    // 🔁 BigliettoGrpc ➜ BigliettoDTO
+    // 🔁 BigliettoGrpc ➜ BigliettoDTO - ⚠️ PROBLEMA: Dati incompleti
     public static BigliettoDTO fromGrpc(BigliettoGrpc g) {
+        // ⚠️ Questo metodo ha limitazioni - i dati cliente/tratta sono minimali
         return new BigliettoDTO(
                 UUID.fromString(g.getId()),
                 new ClienteDTO(
@@ -94,7 +175,7 @@ public class GrpcMapper {
                 ),
                 new TrattaDTO(UUID.fromString(g.getIdTratta()), "", "", null, null, 0, null, null),
                 ClasseServizio.valueOf(g.getClasse()),
-                TipoPrezzo.INTERO,
+                g.getConCartaFedelta() ? TipoPrezzo.FEDELTA : TipoPrezzo.INTERO,
                 g.getPrezzoPagato(),
                 g.getTipoAcquisto().equalsIgnoreCase("ACQUISTO") ? StatoBiglietto.CONFERMATO : StatoBiglietto.NON_CONFERMATO
         );
@@ -122,8 +203,8 @@ public class GrpcMapper {
                 LocalDate.parse(g.getData()),
                 LocalTime.parse(g.getOra()),
                 Integer.parseInt(g.getBinario()),
-                null,
-                null
+                null, // ⚠️ TrenoDTO non disponibile da gRPC
+                null  // ⚠️ Prezzi non disponibili da gRPC
         );
     }
 }

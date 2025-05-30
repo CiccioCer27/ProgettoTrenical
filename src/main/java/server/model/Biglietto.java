@@ -1,5 +1,7 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import enums.ClasseServizio;
 
 import java.time.LocalDate;
@@ -16,6 +18,29 @@ public class Biglietto {
     private final LocalDate dataAcquisto;
     private final String tipoAcquisto;
 
+    // ✅ Constructor per Jackson
+    @JsonCreator
+    public Biglietto(
+            @JsonProperty("id") UUID id,
+            @JsonProperty("idCliente") UUID idCliente,
+            @JsonProperty("idTratta") UUID idTratta,
+            @JsonProperty("classe") ClasseServizio classe,
+            @JsonProperty("conCartaFedelta") boolean conCartaFedelta,
+            @JsonProperty("prezzoPagato") double prezzoPagato,
+            @JsonProperty("dataAcquisto") LocalDate dataAcquisto,
+            @JsonProperty("tipoAcquisto") String tipoAcquisto
+    ) {
+        this.id = id;
+        this.idCliente = idCliente;
+        this.idTratta = idTratta;
+        this.classe = classe;
+        this.conCartaFedelta = conCartaFedelta;
+        this.prezzoPagato = prezzoPagato;
+        this.dataAcquisto = dataAcquisto;
+        this.tipoAcquisto = tipoAcquisto;
+    }
+
+    // ✅ Constructor privato per Builder
     private Biglietto(Builder builder) {
         this.id = builder.id;
         this.idCliente = builder.idCliente;
