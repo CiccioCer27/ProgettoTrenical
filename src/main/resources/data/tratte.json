@@ -1,0 +1,577 @@
+[ {
+  "id" : "19f1444d-4c86-4563-8517-c2e06f02b130",
+  "stazionePartenza" : "Napoli",
+  "stazioneArrivo" : "Torino",
+  "data" : "2025-05-31",
+  "ora" : "17:00:00",
+  "binario" : 3,
+  "treno" : {
+    "id" : "c0d4350a-1eec-477e-a89d-13557f0705a0",
+    "numero" : 100,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 0"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 21.05728932990195,
+      "promozione" : 16.84583146392156,
+      "fedelta" : 12.634373597941167
+    },
+    "ARGENTO" : {
+      "intero" : 30.785451763191478,
+      "promozione" : 24.628361410553183,
+      "fedelta" : 18.471271057914887
+    },
+    "BASE" : {
+      "intero" : 25.334696469576837,
+      "promozione" : 20.267757175661473,
+      "fedelta" : 15.2008178817461
+    }
+  }
+}, {
+  "id" : "5d94cd9b-98b8-4165-80e3-7f7ab61c67aa",
+  "stazionePartenza" : "Milano",
+  "stazioneArrivo" : "Firenze",
+  "data" : "2025-05-31",
+  "ora" : "08:00:00",
+  "binario" : 5,
+  "treno" : {
+    "id" : "4193246f-bc80-4ef1-bfe7-b3e1732a0e3f",
+    "numero" : 100,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 0"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 23.97051213824543,
+      "promozione" : 19.176409710596342,
+      "fedelta" : 14.382307282947256
+    },
+    "ARGENTO" : {
+      "intero" : 25.954963721455073,
+      "promozione" : 20.76397097716406,
+      "fedelta" : 15.572978232873043
+    },
+    "BASE" : {
+      "intero" : 10.816430140891452,
+      "promozione" : 8.653144112713163,
+      "fedelta" : 6.489858084534871
+    }
+  }
+}, {
+  "id" : "ca144faf-7c6d-4058-9ac2-79c75816548e",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Strongoli",
+  "data" : "2025-05-31",
+  "ora" : "10:00:00",
+  "binario" : 10,
+  "treno" : {
+    "id" : "d2d1b8b3-63e0-4218-80cc-25baed76b6bc",
+    "numero" : 101,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 1"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 30.87184548363182,
+      "promozione" : 24.697476386905457,
+      "fedelta" : 18.52310729017909
+    },
+    "ARGENTO" : {
+      "intero" : 24.01589699938856,
+      "promozione" : 19.212717599510846,
+      "fedelta" : 14.409538199633134
+    },
+    "BASE" : {
+      "intero" : 15.134434075898405,
+      "promozione" : 12.107547260718725,
+      "fedelta" : 9.080660445539042
+    }
+  }
+}, {
+  "id" : "cb87276d-4a49-4b60-aac5-7bcf9381fbb6",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Napoli",
+  "data" : "2025-05-31",
+  "ora" : "08:00:00",
+  "binario" : 3,
+  "treno" : {
+    "id" : "9b7af202-c0c5-472f-8e83-472315297edc",
+    "numero" : 102,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 2"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 38.083974446330835,
+      "promozione" : 30.467179557064668,
+      "fedelta" : 22.850384667798497
+    },
+    "ARGENTO" : {
+      "intero" : 22.204843473152202,
+      "promozione" : 17.763874778521764,
+      "fedelta" : 13.32290608389132
+    },
+    "BASE" : {
+      "intero" : 25.447588008796437,
+      "promozione" : 20.35807040703715,
+      "fedelta" : 15.268552805277862
+    }
+  }
+}, {
+  "id" : "d6b9bcfb-4026-4bb8-a19e-ebfec1cd2222",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Firenze",
+  "data" : "2025-05-31",
+  "ora" : "10:00:00",
+  "binario" : 4,
+  "treno" : {
+    "id" : "5995cb1b-faed-411a-b3cd-a609f5dcddd1",
+    "numero" : 103,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 3"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 43.463936060382366,
+      "promozione" : 34.77114884830589,
+      "fedelta" : 26.078361636229417
+    },
+    "ARGENTO" : {
+      "intero" : 14.904904899338444,
+      "promozione" : 11.923923919470756,
+      "fedelta" : 8.942942939603066
+    },
+    "BASE" : {
+      "intero" : 24.14363365226269,
+      "promozione" : 19.314906921810152,
+      "fedelta" : 14.486180191357613
+    }
+  }
+}, {
+  "id" : "922080c4-26e8-4c7e-84a9-f20fba3760e5",
+  "stazionePartenza" : "Roma",
+  "stazioneArrivo" : "Napoli",
+  "data" : "2025-05-31",
+  "ora" : "08:00:00",
+  "binario" : 10,
+  "treno" : {
+    "id" : "441bb1ac-e8e6-4fe3-b0c2-566a160b41c2",
+    "numero" : 104,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 4"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 27.29232218238463,
+      "promozione" : 21.833857745907707,
+      "fedelta" : 16.375393309430777
+    },
+    "ARGENTO" : {
+      "intero" : 20.53913112325229,
+      "promozione" : 16.431304898601834,
+      "fedelta" : 12.323478673951373
+    },
+    "BASE" : {
+      "intero" : 16.643326527320284,
+      "promozione" : 13.314661221856227,
+      "fedelta" : 9.98599591639217
+    }
+  }
+}, {
+  "id" : "2d6405e6-d2da-4d69-b4ce-a03dfafcabbb",
+  "stazionePartenza" : "Roma",
+  "stazioneArrivo" : "Firenze",
+  "data" : "2025-06-01",
+  "ora" : "09:00:00",
+  "binario" : 1,
+  "treno" : {
+    "id" : "34486c94-aec7-46f6-b56a-8871d1c99bb1",
+    "numero" : 100,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 0"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 47.21922720713818,
+      "promozione" : 37.77538176571055,
+      "fedelta" : 28.331536324282908
+    },
+    "ARGENTO" : {
+      "intero" : 22.52924101355629,
+      "promozione" : 18.023392810845035,
+      "fedelta" : 13.517544608133775
+    },
+    "BASE" : {
+      "intero" : 24.032873332329906,
+      "promozione" : 19.226298665863926,
+      "fedelta" : 14.419723999397943
+    }
+  }
+}, {
+  "id" : "6e98dd34-e4f7-41b4-b519-3857d6385d92",
+  "stazionePartenza" : "Rende",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-01",
+  "ora" : "11:00:00",
+  "binario" : 6,
+  "treno" : {
+    "id" : "455adaa8-4317-4d62-ad1b-38b8ee29446c",
+    "numero" : 101,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 1"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 46.63748706347815,
+      "promozione" : 37.30998965078252,
+      "fedelta" : 27.98249223808689
+    },
+    "ARGENTO" : {
+      "intero" : 30.018091456330854,
+      "promozione" : 24.014473165064686,
+      "fedelta" : 18.01085487379851
+    },
+    "BASE" : {
+      "intero" : 24.022968774967367,
+      "promozione" : 19.218375019973895,
+      "fedelta" : 14.41378126498042
+    }
+  }
+}, {
+  "id" : "dae977e2-e7e5-4ba0-9492-b8269495d3af",
+  "stazionePartenza" : "Strongoli",
+  "stazioneArrivo" : "Firenze",
+  "data" : "2025-06-01",
+  "ora" : "17:00:00",
+  "binario" : 9,
+  "treno" : {
+    "id" : "ef301541-e7e2-43f4-9dc6-2fa6655aa8a4",
+    "numero" : 102,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 2"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 21.14265193028641,
+      "promozione" : 16.91412154422913,
+      "fedelta" : 12.685591158171846
+    },
+    "ARGENTO" : {
+      "intero" : 37.72109179438441,
+      "promozione" : 30.17687343550753,
+      "fedelta" : 22.632655076630645
+    },
+    "BASE" : {
+      "intero" : 21.830519981255588,
+      "promozione" : 17.46441598500447,
+      "fedelta" : 13.098311988753352
+    }
+  }
+}, {
+  "id" : "d596d0c7-b353-4651-9785-1fd4c3773621",
+  "stazionePartenza" : "Torino",
+  "stazioneArrivo" : "Strongoli",
+  "data" : "2025-06-01",
+  "ora" : "12:00:00",
+  "binario" : 5,
+  "treno" : {
+    "id" : "d5d793e9-cd3f-42b1-a768-aa3ed1ca189e",
+    "numero" : 103,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 3"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 44.80182972363962,
+      "promozione" : 35.841463778911695,
+      "fedelta" : 26.881097834183773
+    },
+    "ARGENTO" : {
+      "intero" : 28.228698455537664,
+      "promozione" : 22.58295876443013,
+      "fedelta" : 16.9372190733226
+    },
+    "BASE" : {
+      "intero" : 29.840244750050616,
+      "promozione" : 23.872195800040494,
+      "fedelta" : 17.90414685003037
+    }
+  }
+}, {
+  "id" : "8e764802-fc37-4b18-a664-faa7e4e92428",
+  "stazionePartenza" : "Firenze",
+  "stazioneArrivo" : "ReggioCalabria",
+  "data" : "2025-06-01",
+  "ora" : "11:00:00",
+  "binario" : 8,
+  "treno" : {
+    "id" : "ed644e0a-e609-4a15-8a98-69aebb02c2af",
+    "numero" : 104,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 4"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 31.36925527545222,
+      "promozione" : 25.095404220361775,
+      "fedelta" : 18.821553165271332
+    },
+    "ARGENTO" : {
+      "intero" : 37.856448838097016,
+      "promozione" : 30.28515907047762,
+      "fedelta" : 22.713869302858214
+    },
+    "BASE" : {
+      "intero" : 26.435020589355116,
+      "promozione" : 21.148016471484095,
+      "fedelta" : 15.861012353613068
+    }
+  }
+}, {
+  "id" : "5345ee57-6b3c-4736-ab1e-99ca0b9b66e4",
+  "stazionePartenza" : "Torino",
+  "stazioneArrivo" : "Firenze",
+  "data" : "2025-06-02",
+  "ora" : "10:00:00",
+  "binario" : 2,
+  "treno" : {
+    "id" : "ab177e17-644b-4bbf-8054-df4ae9165ad8",
+    "numero" : 100,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 0"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 17.211838271390107,
+      "promozione" : 13.769470617112086,
+      "fedelta" : 10.327102962834065
+    },
+    "ARGENTO" : {
+      "intero" : 35.49383430520734,
+      "promozione" : 28.395067444165875,
+      "fedelta" : 21.296300583124403
+    },
+    "BASE" : {
+      "intero" : 18.69302561259859,
+      "promozione" : 14.954420490078872,
+      "fedelta" : 11.215815367559154
+    }
+  }
+}, {
+  "id" : "ea7bf776-3d35-49a3-9062-e0362a89a49c",
+  "stazionePartenza" : "Milano",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-02",
+  "ora" : "13:00:00",
+  "binario" : 5,
+  "treno" : {
+    "id" : "db9fcd5b-edb4-468a-8667-9b0c63d275b9",
+    "numero" : 101,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 1"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 32.19646066045444,
+      "promozione" : 25.757168528363554,
+      "fedelta" : 19.317876396272663
+    },
+    "ARGENTO" : {
+      "intero" : 35.25899774800888,
+      "promozione" : 28.20719819840711,
+      "fedelta" : 21.155398648805328
+    },
+    "BASE" : {
+      "intero" : 19.894012988648683,
+      "promozione" : 15.915210390918947,
+      "fedelta" : 11.93640779318921
+    }
+  }
+}, {
+  "id" : "a42cf867-47a1-4abb-92df-eedfa6d26697",
+  "stazionePartenza" : "Firenze",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-02",
+  "ora" : "13:00:00",
+  "binario" : 10,
+  "treno" : {
+    "id" : "e28eb0fe-405d-496f-b82c-0e91312c4931",
+    "numero" : 102,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 2"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 23.087982594287872,
+      "promozione" : 18.470386075430298,
+      "fedelta" : 13.852789556572723
+    },
+    "ARGENTO" : {
+      "intero" : 32.68972431672541,
+      "promozione" : 26.15177945338033,
+      "fedelta" : 19.613834590035246
+    },
+    "BASE" : {
+      "intero" : 22.44427756009669,
+      "promozione" : 17.955422048077352,
+      "fedelta" : 13.466566536058014
+    }
+  }
+}, {
+  "id" : "734729a3-7851-4fdd-bccc-39237bc7baaa",
+  "stazionePartenza" : "Rende",
+  "stazioneArrivo" : "Torino",
+  "data" : "2025-06-02",
+  "ora" : "15:00:00",
+  "binario" : 4,
+  "treno" : {
+    "id" : "5ac137ec-90b8-4b48-9ea9-333819b69bce",
+    "numero" : 103,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 3"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 43.9578875033992,
+      "promozione" : 35.166310002719364,
+      "fedelta" : 26.37473250203952
+    },
+    "ARGENTO" : {
+      "intero" : 26.290631686197937,
+      "promozione" : 21.03250534895835,
+      "fedelta" : 15.774379011718763
+    },
+    "BASE" : {
+      "intero" : 14.603184783004048,
+      "promozione" : 11.682547826403239,
+      "fedelta" : 8.761910869802428
+    }
+  }
+}, {
+  "id" : "e3dc916b-a75d-4014-86b0-c43fab666f83",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Napoli",
+  "data" : "2025-06-02",
+  "ora" : "17:00:00",
+  "binario" : 3,
+  "treno" : {
+    "id" : "44608b43-6750-4a8c-b514-ff293beb4b07",
+    "numero" : 104,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Treno 4"
+  },
+  "prezzi" : {
+    "GOLD" : {
+      "intero" : 45.77703498582037,
+      "promozione" : 36.6216279886563,
+      "fedelta" : 27.46622099149222
+    },
+    "ARGENTO" : {
+      "intero" : 29.123048451958596,
+      "promozione" : 23.298438761566878,
+      "fedelta" : 17.47382907117516
+    },
+    "BASE" : {
+      "intero" : 10.356760948619339,
+      "promozione" : 8.285408758895471,
+      "fedelta" : 6.214056569171603
+    }
+  }
+} ]
