@@ -25,6 +25,7 @@ public class ServerMain {
     private static final int BANCA_PORT = 9091;
 
     public static void main(String[] args) throws Exception {
+        System.out.println("🔥 DEBUG: Server avviato con modifiche debug!");
         System.out.println("🚀 Avvio Server TreniCal");
 
         // 1️⃣ Avvia il server della banca

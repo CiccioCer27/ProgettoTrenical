@@ -21,7 +21,7 @@
     </properties>
 
     <dependencies>
-        <!-- ✅ gRPC Dependencies -->
+        <!-- gRPC Dependencies -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
@@ -43,14 +43,14 @@
             <version>${grpc.version}</version>
         </dependency>
 
-        <!-- ✅ Protobuf -->
+        <!-- Protobuf -->
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
             <version>${protobuf.version}</version>
         </dependency>
 
-        <!-- ✅ Jackson per JSON -->
+        <!-- Jackson per JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -72,7 +72,7 @@
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- ✅ JavaFX Dependencies (AGGIORNATE) -->
+        <!-- JavaFX Dependencies -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -94,21 +94,19 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- ✅ Guava (per @VisibleForTesting e utility varie) -->
+        <!-- Guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>32.1.3-jre</version>
         </dependency>
 
-        <!-- ✅ javax.annotation (compatibility per gRPC) -->
+        <!-- Annotations -->
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
         </dependency>
-
-        <!-- ✅ Tomcat Annotations API (per @Generated annotations) -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>annotations-api</artifactId>
@@ -116,7 +114,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ✅ JUnit 5 per testing -->
+        <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -136,7 +134,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ✅ Mockito per mock nei test -->
+        <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -150,7 +148,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ✅ Logging -->
+        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -173,7 +171,6 @@
         </extensions>
 
         <plugins>
-            <!-- ✅ Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -185,7 +182,6 @@
                 </configuration>
             </plugin>
 
-            <!-- ✅ Protobuf Maven Plugin -->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
@@ -207,96 +203,25 @@
                 </executions>
             </plugin>
 
-            <!-- ✅ JavaFX Maven Plugin -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx.maven.plugin.version}</version>
                 <configuration>
-                    <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                    <mainClass>fx.TrenicalJavaFXDemo</mainClass>
                 </configuration>
                 <executions>
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                            <mainClass>fx.TrenicalJavaFXDemo</mainClass>
                         </configuration>
                     </execution>
                     <execution>
                         <id>debug</id>
                         <configuration>
-                            <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                            <mainClass>fx.TrenicalJavaFXDemo</mainClass>
                             <commandlineArgs>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:8000</commandlineArgs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- ✅ Surefire Plugin per JUnit 5 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-
-            <!-- ✅ Maven Resources Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
-            <!-- ✅ Maven Clean Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.3.1</version>
-            </plugin>
-
-            <!-- ✅ Exec Maven Plugin per eseguire main classes -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <mainClass>test.IntegrationTestMain</mainClass>
-                </configuration>
-                <executions>
-                    <!-- Configurazione per Swing -->
-                    <execution>
-                        <id>swing-gui</id>
-                        <configuration>
-                            <mainClass>gui.swing.TrenicalSwingDemo</mainClass>
-                        </configuration>
-                    </execution>
-                    <!-- Configurazione per JavaFX -->
-                    <execution>
-                        <id>javafx-gui</id>
-                        <configuration>
-                            <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
-                        </configuration>
-                    </execution>
-                    <!-- Configurazione per Server -->
-                    <execution>
-                        <id>server</id>
-                        <configuration>
-                            <mainClass>main.ServerMain</mainClass>
-                        </configuration>
-                    </execution>
-                    <!-- Configurazione per Test Client -->
-                    <execution>
-                        <id>test-client</id>
-                        <configuration>
-                            <mainClass>test.SimpleClientTest</mainClass>
                         </configuration>
                     </execution>
                 </executions>
@@ -304,7 +229,6 @@
         </plugins>
     </build>
 
-    <!-- ✅ Profiles per diversi ambienti -->
     <profiles>
         <profile>
             <id>dev</id>
@@ -323,7 +247,6 @@
             </properties>
         </profile>
 
-        <!-- ✅ Profile per JavaFX -->
         <profile>
             <id>javafx</id>
             <build>
@@ -336,27 +259,10 @@
                             <execution>
                                 <id>default-cli</id>
                                 <configuration>
-                                    <mainClass>gui.fx.TrenicalJavaFXDemo</mainClass>
+                                    <mainClass>fx.TrenicalJavaFXDemo</mainClass>
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- ✅ Profile per GUI testing -->
-        <profile>
-            <id>gui-test</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <configuration>
-                            <mainClass>gui.swing.TrenicalSwingDemo</mainClass>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

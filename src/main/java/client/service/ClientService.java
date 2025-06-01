@@ -38,26 +38,39 @@ public class ClientService {
         System.out.println("✅ Cliente attivato: " + cliente.getNome() + " (" + cliente.getId() + ")");
     }
 
+    // SOSTITUISCI questo metodo nel tuo ClientService.java esistente:
+
     public ClienteDTO getCliente() {
-        checkClienteAttivo();
+        // RIMUOVI la chiamata a checkClienteAttivo()
+        // e ritorna semplicemente il cliente (può essere null)
         return cliente;
     }
 
+    // AGGIUNGI questo nuovo metodo:
+    public boolean isClienteAttivo() {
+        return cliente != null;
+    }
+
+    // MODIFICA anche questo metodo per essere più sicuro:
+    public RispostaDTO inviaRichiesta(RichiestaDTO richiestaDTO) {
+        // RIMUOVI checkClienteAttivo() per le richieste che non necessitano cliente
+        // checkClienteAttivo();
+
+        RichiestaGrpc grpcRequest = GrpcMapper.toGrpc(richiestaDTO);
+        RispostaGrpc grpcResponse = stub.inviaRichiesta(grpcRequest);
+        return GrpcMapper.fromGrpc(grpcResponse);
+    }
+
+    // MANTIENI checkClienteAttivo() ma usalo solo dove necessario:
     private void checkClienteAttivo() {
         if (cliente == null) {
             throw new IllegalStateException("⚠️ Cliente non attivo. Devi prima registrarti.");
         }
     }
 
-    public RispostaDTO inviaRichiesta(RichiestaDTO richiestaDTO) {
-        checkClienteAttivo();
-        RichiestaGrpc grpcRequest = GrpcMapper.toGrpc(richiestaDTO);
-        RispostaGrpc grpcResponse = stub.inviaRichiesta(grpcRequest);
-        return GrpcMapper.fromGrpc(grpcResponse);
-    }
-
+    // MODIFICA il metodo avviaNotificheTratta per usare checkClienteAttivo():
     public void avviaNotificheTratta(TrattaDTO tratta) {
-        checkClienteAttivo();
+        checkClienteAttivo(); // Solo qui è necessario
 
         IscrizioneNotificheGrpc richiesta = IscrizioneNotificheGrpc.newBuilder()
                 .setEmailCliente(cliente.getEmail())
@@ -80,5 +93,4 @@ public class ClientService {
                 System.out.println("🔚 Stream notifiche tratta completato.");
             }
         });
-    }
-}
+    }}

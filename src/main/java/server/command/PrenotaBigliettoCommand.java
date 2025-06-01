@@ -1,7 +1,13 @@
 package command;
 
+import Assembler.AssemblerTratta;
+import dto.BigliettoDTO;
+import dto.ClienteDTO;
 import dto.RichiestaDTO;
 import dto.RispostaDTO;
+import dto.TrattaDTO;
+import enums.StatoBiglietto;
+import enums.TipoPrezzo;
 import eventi.EventoGdsPrenotaz;
 import model.Biglietto;
 import model.Tratta;
@@ -9,6 +15,7 @@ import observer.EventDispatcher;
 import persistence.MemoriaBiglietti;
 import persistence.MemoriaClientiFedeli;
 import persistence.MemoriaTratte;
+import scheduling.PrenotazioneScheduler;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -20,6 +27,7 @@ public class PrenotaBigliettoCommand implements ServerCommand {
     private final MemoriaTratte memoriaTratte;
     private final MemoriaClientiFedeli memoriaFedeli;
     private final EventDispatcher dispatcher;
+    private final PrenotazioneScheduler scheduler; // ⚠️ NUOVO
 
     public PrenotaBigliettoCommand(
             RichiestaDTO richiesta,
@@ -28,11 +36,24 @@ public class PrenotaBigliettoCommand implements ServerCommand {
             MemoriaClientiFedeli memoriaFedeli,
             EventDispatcher dispatcher
     ) {
+        this(richiesta, memoriaBiglietti, memoriaTratte, memoriaFedeli, dispatcher, null);
+    }
+
+    // Costruttore con scheduler
+    public PrenotaBigliettoCommand(
+            RichiestaDTO richiesta,
+            MemoriaBiglietti memoriaBiglietti,
+            MemoriaTratte memoriaTratte,
+            MemoriaClientiFedeli memoriaFedeli,
+            EventDispatcher dispatcher,
+            PrenotazioneScheduler scheduler
+    ) {
         this.richiesta = richiesta;
         this.memoriaBiglietti = memoriaBiglietti;
         this.memoriaTratte = memoriaTratte;
         this.memoriaFedeli = memoriaFedeli;
         this.dispatcher = dispatcher;
+        this.scheduler = scheduler;
     }
 
     @Override
@@ -56,19 +77,25 @@ public class PrenotaBigliettoCommand implements ServerCommand {
 
         // Verifica se può usare quel tipo di prezzo
         boolean isFedele = memoriaFedeli.isClienteFedele(idCliente);
-        switch (richiesta.getTipoPrezzo()) {
-            case FEDELTA:
-                if (!isFedele) {
-                    return new RispostaDTO("KO", "❌ Prezzo fedeltà non disponibile per questo cliente", null);
-                }
-                break;
-
+        if (richiesta.getTipoPrezzo() != null) {
+            switch (richiesta.getTipoPrezzo()) {
+                case FEDELTA:
+                    if (!isFedele) {
+                        return new RispostaDTO("KO", "❌ Prezzo fedeltà non disponibile per questo cliente", null);
+                    }
+                    break;
+            }
         }
+
+        // Per le prenotazioni, usiamo prezzo INTERO di default
+        TipoPrezzo tipoPrezzoEffettivo = richiesta.getTipoPrezzo() != null ?
+                richiesta.getTipoPrezzo() : TipoPrezzo.INTERO;
 
         double prezzo = tratta.getPrezzi()
                 .get(richiesta.getClasseServizio())
-                .getPrezzo(richiesta.getTipoPrezzo());
+                .getPrezzo(tipoPrezzoEffettivo);
 
+        // Crea biglietto prenotato (model)
         Biglietto biglietto = new Biglietto.Builder()
                 .idCliente(idCliente)
                 .idTratta(tratta.getId())
@@ -82,6 +109,30 @@ public class PrenotaBigliettoCommand implements ServerCommand {
         memoriaBiglietti.aggiungiBiglietto(biglietto);
         dispatcher.dispatch(new EventoGdsPrenotaz(biglietto));
 
-        return new RispostaDTO("OK", "✅ Prenotazione effettuata", biglietto);
+        // 🔔 Programma rimozione automatica dopo 10 minuti
+        if (scheduler != null) {
+            scheduler.programmaRimozione(biglietto);
+        }
+
+        // 🔧 CONVERSIONE A DTO
+        ClienteDTO clienteDTO = new ClienteDTO(
+                idCliente,
+                "Cliente", "Test", "cliente@test.com",
+                isFedele, 0, "", 0, ""
+        );
+
+        TrattaDTO trattaDTO = AssemblerTratta.toDTO(tratta);
+
+        BigliettoDTO bigliettoDTO = new BigliettoDTO(
+                biglietto.getId(),
+                clienteDTO,
+                trattaDTO,
+                biglietto.getClasse(),
+                tipoPrezzoEffettivo,
+                biglietto.getPrezzoPagato(),
+                StatoBiglietto.NON_CONFERMATO // ⚠️ PRENOTAZIONE = NON_CONFERMATO
+        );
+
+        return new RispostaDTO("OK", "✅ Prenotazione effettuata", bigliettoDTO);
     }
 }

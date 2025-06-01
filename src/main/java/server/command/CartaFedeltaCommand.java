@@ -45,6 +45,7 @@ public class CartaFedeltaCommand implements ServerCommand {
         memoria.registraClienteFedele(idCliente);
         dispatcher.dispatch(new EventoAcquistoCartaFed(idCliente));
 
+        // ⚠️ CartaFedeltaCommand NON restituisce biglietti, quindi va bene così
         return new RispostaDTO("OK", "Carta fedeltà acquistata con successo", null);
     }
 }

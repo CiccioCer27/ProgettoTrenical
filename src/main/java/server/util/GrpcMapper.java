@@ -116,15 +116,25 @@ public class GrpcMapper {
 
     // 🔁 RispostaDTO ➜ RispostaGrpc
     public static RispostaGrpc fromDTO(RispostaDTO dto) {
+        System.out.println("🔄 DEBUG GrpcMapper.fromDTO: Conversione RispostaDTO -> RispostaGrpc");
+        System.out.println("   Esito: " + dto.getEsito());
+        System.out.println("   Messaggio: " + dto.getMessaggio());
+        System.out.println("   Ha biglietto: " + (dto.getBiglietto() != null));
+        System.out.println("   Ha tratte: " + (dto.getTratte() != null && !dto.getTratte().isEmpty()));
+
         RispostaGrpc.Builder builder = RispostaGrpc.newBuilder()
                 .setEsito(dto.getEsito())
                 .setMessaggio(dto.getMessaggio());
 
         if (dto.getBiglietto() != null) {
+            System.out.println("✅ DEBUG: Aggiungendo biglietto alla risposta gRPC");
             builder.setBiglietto(toGrpc(dto.getBiglietto()));
+        } else {
+            System.out.println("❌ DEBUG: Nessun biglietto da aggiungere alla risposta gRPC");
         }
 
         if (dto.getTratte() != null && !dto.getTratte().isEmpty()) {
+            System.out.println("✅ DEBUG: Aggiungendo " + dto.getTratte().size() + " tratte alla risposta gRPC");
             builder.addAllTratte(dto.getTratte().stream()
                     .map(GrpcMapper::toGrpc)
                     .collect(Collectors.toList()));
@@ -133,15 +143,30 @@ public class GrpcMapper {
         return builder.build();
     }
 
-    // 🔁 RispostaGrpc ➜ RispostaDTO
+    // 🔁 RispostaGrpc ➜ RispostaDTO ⚠️ QUESTO È IL PROBLEMA!
     public static RispostaDTO fromGrpc(RispostaGrpc grpc) {
-        BigliettoDTO biglietto = grpc.hasBiglietto() ? fromGrpc(grpc.getBiglietto()) : null;
+        System.out.println("🔄 DEBUG GrpcMapper.fromGrpc: Conversione RispostaGrpc -> RispostaDTO");
+        System.out.println("   Esito: " + grpc.getEsito());
+        System.out.println("   Messaggio: " + grpc.getMessaggio());
+        System.out.println("   Ha biglietto gRPC: " + grpc.hasBiglietto());
+        System.out.println("   Numero tratte gRPC: " + grpc.getTratteCount());
+
+        BigliettoDTO biglietto = null;
+        if (grpc.hasBiglietto()) {
+            System.out.println("✅ DEBUG: Convertendo biglietto da gRPC");
+            biglietto = fromGrpc(grpc.getBiglietto());
+            System.out.println("   Biglietto convertito: " + (biglietto != null ? "OK" : "FAILED"));
+        } else {
+            System.out.println("❌ DEBUG: Nessun biglietto nella risposta gRPC");
+        }
 
         List<TrattaDTO> tratte = grpc.getTratteList().stream()
                 .map(GrpcMapper::fromGrpc)
                 .collect(Collectors.toList());
 
         Object dati = biglietto != null ? biglietto : (!tratte.isEmpty() ? tratte : null);
+
+        System.out.println("📋 DEBUG: Dati finali per RispostaDTO: " + (dati != null ? dati.getClass().getSimpleName() : "NULL"));
 
         return new RispostaDTO(
                 grpc.getEsito(),
@@ -152,33 +177,68 @@ public class GrpcMapper {
 
     // 🔁 BigliettoDTO ➜ BigliettoGrpc
     public static BigliettoGrpc toGrpc(BigliettoDTO b) {
+        System.out.println("🎫 DEBUG: Convertendo BigliettoDTO -> BigliettoGrpc");
+        System.out.println("   ID: " + b.getId());
+        System.out.println("   Cliente: " + (b.getCliente() != null ? b.getCliente().getId() : "NULL"));
+        System.out.println("   Tratta: " + (b.getTratta() != null ? b.getTratta().getId() : "NULL"));
+
         return BigliettoGrpc.newBuilder()
                 .setId(b.getId().toString())
-                .setIdCliente(b.getCliente().getId().toString())
-                .setIdTratta(b.getTratta().getId().toString())
-                .setClasse(b.getClasseServizio().name())
-                .setTipoAcquisto(b.getStato().name())
+                .setIdCliente(b.getCliente() != null ? b.getCliente().getId().toString() : "")
+                .setIdTratta(b.getTratta() != null ? b.getTratta().getId().toString() : "")
+                .setClasse(b.getClasseServizio() != null ? b.getClasseServizio().name() : "BASE")
+                .setTipoAcquisto(b.getStato() != null ? b.getStato().name() : "CONFERMATO")
                 .setPrezzoPagato(b.getPrezzoEffettivo())
                 .setDataAcquisto(LocalDate.now().toString())
                 .setConCartaFedelta(b.getTipoPrezzo() == TipoPrezzo.FEDELTA)
                 .build();
     }
 
-    // 🔁 BigliettoGrpc ➜ BigliettoDTO - ⚠️ PROBLEMA: Dati incompleti
+    // 🔁 BigliettoGrpc ➜ BigliettoDTO - ⚠️ PROBLEMA QUI!
     public static BigliettoDTO fromGrpc(BigliettoGrpc g) {
-        // ⚠️ Questo metodo ha limitazioni - i dati cliente/tratta sono minimali
-        return new BigliettoDTO(
-                UUID.fromString(g.getId()),
-                new ClienteDTO(
-                        UUID.fromString(g.getIdCliente()),
-                        "", "", "", false, 0, "", 0, ""
-                ),
-                new TrattaDTO(UUID.fromString(g.getIdTratta()), "", "", null, null, 0, null, null),
-                ClasseServizio.valueOf(g.getClasse()),
-                g.getConCartaFedelta() ? TipoPrezzo.FEDELTA : TipoPrezzo.INTERO,
-                g.getPrezzoPagato(),
-                g.getTipoAcquisto().equalsIgnoreCase("ACQUISTO") ? StatoBiglietto.CONFERMATO : StatoBiglietto.NON_CONFERMATO
-        );
+        System.out.println("🎫 DEBUG: Convertendo BigliettoGrpc -> BigliettoDTO");
+        System.out.println("   ID gRPC: " + g.getId());
+        System.out.println("   Cliente gRPC: " + g.getIdCliente());
+        System.out.println("   Tratta gRPC: " + g.getIdTratta());
+
+        try {
+            // ⚠️ Questo metodo ha limitazioni - i dati cliente/tratta sono minimali
+            // Ma per il wallet è sufficiente avere l'ID
+
+            // Crea ClienteDTO minimale
+            ClienteDTO clienteMinimale = new ClienteDTO(
+                    UUID.fromString(g.getIdCliente()),
+                    "Cliente", "Test", "test@email.com",
+                    g.getConCartaFedelta(), 0, "", 0, ""
+            );
+
+            // Crea TrattaDTO minimale
+            TrattaDTO trattaMinimale = new TrattaDTO(
+                    UUID.fromString(g.getIdTratta()),
+                    "Partenza", "Arrivo",
+                    LocalDate.now(), LocalTime.now(), 1,
+                    null, null
+            );
+
+            BigliettoDTO biglietto = new BigliettoDTO(
+                    UUID.fromString(g.getId()),
+                    clienteMinimale,
+                    trattaMinimale,
+                    ClasseServizio.valueOf(g.getClasse()),
+                    g.getConCartaFedelta() ? TipoPrezzo.FEDELTA : TipoPrezzo.INTERO,
+                    g.getPrezzoPagato(),
+                    g.getTipoAcquisto().equalsIgnoreCase("CONFERMATO") ?
+                            StatoBiglietto.CONFERMATO : StatoBiglietto.NON_CONFERMATO
+            );
+
+            System.out.println("✅ DEBUG: BigliettoDTO creato con successo");
+            return biglietto;
+
+        } catch (Exception e) {
+            System.err.println("❌ DEBUG: Errore conversione BigliettoGrpc: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
     // 🔁 TrattaDTO ➜ TrattaGrpc

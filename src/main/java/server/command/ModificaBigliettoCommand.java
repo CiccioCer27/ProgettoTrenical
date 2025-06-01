@@ -1,7 +1,12 @@
 package command;
 
+import Assembler.AssemblerTratta;
+import dto.BigliettoDTO;
+import dto.ClienteDTO;
 import dto.RichiestaDTO;
 import dto.RispostaDTO;
+import dto.TrattaDTO;
+import enums.StatoBiglietto;
 import eventi.EventoGdsModifica;
 import model.Biglietto;
 import model.Tratta;
@@ -92,8 +97,27 @@ public class ModificaBigliettoCommand implements ServerCommand {
                 .build();
 
         memoriaBiglietti.aggiungiBiglietto(nuovo);
-
         dispatcher.dispatch(new EventoGdsModifica(originale, nuovo));
-        return new RispostaDTO("OK", "Biglietto modificato con successo", nuovo);
+
+        // 🔧 CONVERSIONE A DTO
+        ClienteDTO clienteDTO = new ClienteDTO(
+                idCliente,
+                "Cliente", "Test", "cliente@test.com",
+                isFedele, 0, "", 0, ""
+        );
+
+        TrattaDTO trattaDTO = AssemblerTratta.toDTO(nuovaTratta);
+
+        BigliettoDTO bigliettoDTO = new BigliettoDTO(
+                nuovo.getId(),
+                clienteDTO,
+                trattaDTO,
+                nuovo.getClasse(),
+                richiesta.getTipoPrezzo(),
+                nuovo.getPrezzoPagato(),
+                StatoBiglietto.CONFERMATO
+        );
+
+        return new RispostaDTO("OK", "Biglietto modificato con successo", bigliettoDTO);
     }
 }
