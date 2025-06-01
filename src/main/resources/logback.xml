@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console output pulito per i test -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Disabilita completamente i log gRPC e Netty -->
+    <logger name="io.grpc" level="OFF"/>
+    <logger name="io.grpc.netty" level="OFF"/>
+    <logger name="io.netty" level="OFF"/>
+    <logger name="io.grpc.netty.shaded" level="OFF"/>
+
+    <!-- Root logger solo per messaggi della nostra applicazione -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

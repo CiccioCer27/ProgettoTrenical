@@ -56,7 +56,7 @@ public class ServerMain {
         GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
 
         // Registra listeners
-        dispatcher.registra(new MemoriaBigliettiListener(memoriaBiglietti));
+        dispatcher.registra(new MemoriaBigliettiListener(memoriaBiglietti, memoriaTratte));
         dispatcher.registra(new MemoriaClientiFedeliListener(memoriaClienti));
         dispatcher.registra(new EventoLoggerListener());
         dispatcher.registra(new NotificaEventiListener(notificaDispatcher, memoriaTratte));

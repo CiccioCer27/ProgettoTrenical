@@ -84,6 +84,7 @@ public class ModificaBigliettoCommand implements ServerCommand {
             return new RispostaDTO("KO", "❌ Pagamento penale fallito", null);
         }
 
+        // Rimuovi il biglietto originale
         memoriaBiglietti.rimuoviBiglietto(originale.getId());
 
         Biglietto nuovo = new Biglietto.Builder()
@@ -96,7 +97,11 @@ public class ModificaBigliettoCommand implements ServerCommand {
                 .conCartaFedelta(isFedele)
                 .build();
 
-        memoriaBiglietti.aggiungiBiglietto(nuovo);
+        // 🔧 FIX: SOLO l'evento salva il biglietto, NON salvare qui direttamente
+        // RIMUOVI: memoriaBiglietti.aggiungiBiglietto(nuovo);
+
+        // Invia evento che si occuperà del salvataggio tramite MemoriaBigliettiListener
+        System.out.println("🔔 DEBUG MODIFICA: Inviando evento (che salverà il biglietto modificato)");
         dispatcher.dispatch(new EventoGdsModifica(originale, nuovo));
 
         // 🔧 CONVERSIONE A DTO

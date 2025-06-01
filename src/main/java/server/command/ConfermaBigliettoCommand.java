@@ -89,7 +89,11 @@ public class ConfermaBigliettoCommand implements ServerCommand {
                 "acquisto" // Tipo cambia da "prenotazione" a "acquisto"
         );
 
-        memoria.aggiungiBiglietto(confermato);
+        // 🔧 FIX: SOLO l'evento salva il biglietto, NON salvare qui direttamente
+        // RIMUOVI: memoria.aggiungiBiglietto(confermato);
+
+        // Invia evento che si occuperà del salvataggio tramite MemoriaBigliettiListener
+        System.out.println("🔔 DEBUG CONFERMA: Inviando evento (che salverà il biglietto confermato)");
         dispatcher.dispatch(new EventoGdsAcquisto(confermato));
 
         // 🔧 CONVERSIONE A DTO

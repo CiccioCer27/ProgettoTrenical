@@ -118,13 +118,14 @@ public class AcquistaBigliettoCommand implements ServerCommand {
         System.out.println("   ID Cliente: " + biglietto.getIdCliente());
         System.out.println("   ID Tratta: " + biglietto.getIdTratta());
 
-        // Salva il biglietto
-        memoriaBiglietti.aggiungiBiglietto(biglietto);
+        // 🔧 FIX: SOLO l'evento salva il biglietto, NON salvare qui direttamente
+        // RIMUOVI: memoriaBiglietti.aggiungiBiglietto(biglietto);
+
+        // Invia evento che si occuperà del salvataggio tramite MemoriaBigliettiListener
+        System.out.println("🔔 DEBUG SERVER: Inviando evento (che salverà il biglietto)");
         dispatcher.dispatch(new EventoGdsAcquisto(biglietto));
 
-        // 🔧 PROBLEMA ERA QUI: Dobbiamo convertire Biglietto -> BigliettoDTO
-
-        // Crea ClienteDTO minimale per il DTO
+        // 🔧 CONVERSIONE A DTO
         ClienteDTO clienteDTO = new ClienteDTO(
                 idCliente,
                 "Cliente", // Nome minimale

@@ -100,7 +100,7 @@ public class ServerConsoleMain {
         GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
 
         // Registra listeners
-        dispatcher.registra(new MemoriaBigliettiListener(memoriaBiglietti));
+        dispatcher.registra(new MemoriaBigliettiListener(memoriaBiglietti, memoriaTratte));
         dispatcher.registra(new MemoriaClientiFedeliListener(memoriaClientiFedeli));
         dispatcher.registra(new MemoriaPromozioniListener(memoriaPromozioni));
         dispatcher.registra(new EventoLoggerListener());

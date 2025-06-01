@@ -27,7 +27,7 @@ public class PrenotaBigliettoCommand implements ServerCommand {
     private final MemoriaTratte memoriaTratte;
     private final MemoriaClientiFedeli memoriaFedeli;
     private final EventDispatcher dispatcher;
-    private final PrenotazioneScheduler scheduler; // ⚠️ NUOVO
+    private final PrenotazioneScheduler scheduler;
 
     public PrenotaBigliettoCommand(
             RichiestaDTO richiesta,
@@ -106,7 +106,10 @@ public class PrenotaBigliettoCommand implements ServerCommand {
                 .tipoAcquisto("prenotazione")
                 .build();
 
-        memoriaBiglietti.aggiungiBiglietto(biglietto);
+        // 🔧 FIX: SOLO l'evento salva il biglietto, NON salvare qui direttamente
+        // RIMUOVI: memoriaBiglietti.aggiungiBiglietto(biglietto);
+
+        // Invia evento che si occuperà del salvataggio tramite MemoriaBigliettiListener
         dispatcher.dispatch(new EventoGdsPrenotaz(biglietto));
 
         // 🔔 Programma rimozione automatica dopo 10 minuti
