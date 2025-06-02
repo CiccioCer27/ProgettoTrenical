@@ -12,16 +12,10 @@ public class EventoModificaTratta implements EventoS {
     }
 
     @Override
-    public TipoEvento getTipo() {
-        return TipoEvento.MODIFICA_TRATTA;
-    }
+    public TipoEvento getTipo() { return TipoEvento.MODIFICA_TRATTA; }
 
     @Override
-    public Set<UUID> getDestinatari() {
-        return Collections.singleton(idTratta); // oppure chi osserva questa tratta
-    }
+    public Set<UUID> getDestinatari() { return Collections.singleton(idTratta); }
 
-    public UUID getIdTratta() {
-        return idTratta;
-    }
+    public UUID getIdTratta() { return idTratta; }
 }

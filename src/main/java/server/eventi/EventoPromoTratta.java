@@ -13,16 +13,12 @@ public class EventoPromoTratta implements EventoS {
     }
 
     @Override
-    public TipoEvento getTipo() {
-        return TipoEvento.PROMO_TRATTA;
-    }
+    public TipoEvento getTipo() { return TipoEvento.PROMO_TRATTA; }
 
     @Override
     public Set<UUID> getDestinatari() {
         return promozione.getTratteDestinate();
     }
 
-    public PromozioneTratta getPromozione() {
-        return promozione;
-    }
+    public PromozioneTratta getPromozione() { return promozione; }
 }

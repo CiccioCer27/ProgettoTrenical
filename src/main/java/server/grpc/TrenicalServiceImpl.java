@@ -21,8 +21,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Implementazione completa del servizio gRPC TreniCal
- * Gestisce tutte le operazioni: richieste, notifiche tratte e stream promozioni
+ * 🔄 TRENICAL SERVICE IMPL - AGGIORNATO per Broadcast Promozioni Reali
+ *
+ * NUOVO: Supporto per broadcast promozioni create da admin console
+ * MIGLIORAMENTO: Metodi pubblici per integrazione con eventi server
  */
 public class TrenicalServiceImpl extends TrenicalServiceImplBase {
 
@@ -30,13 +32,12 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
     private final ServerRequestHandler requestHandler;
     private final MemoriaPromozioni memoriaPromozioni;
 
-    // ✅ Gestione stream promozioni
+    // Stream management
     private final ConcurrentHashMap<String, StreamObserver<PromozioneGrpc>> promozioniStreams = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-
-    // ✅ Gestione stream notifiche tratte
     private final ConcurrentHashMap<String, StreamObserver<NotificaTrattaGrpc>> notificheStreams = new ConcurrentHashMap<>();
 
+    // ✅ COSTRUTTORE PRINCIPALE (usato da ServerMain)
     public TrenicalServiceImpl(NotificaDispatcher notificaDispatcher,
                                ServerRequestHandler requestHandler,
                                MemoriaPromozioni memoriaPromozioni) {
@@ -44,11 +45,11 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
         this.requestHandler = requestHandler;
         this.memoriaPromozioni = memoriaPromozioni;
 
-        // ✅ Avvia il simulatore di promozioni
-        avviaSimulatorePromozioni();
+        // Avvia simulatore solo per demo/testing
+        //avviaSimulatorePromozioni();
     }
 
-    // ✅ Costruttore semplificato per compatibilità
+    // ✅ COSTRUTTORE BACKWARD-COMPATIBLE
     public TrenicalServiceImpl(NotificaDispatcher notificaDispatcher,
                                ServerRequestHandler requestHandler) {
         this(notificaDispatcher, requestHandler, new MemoriaPromozioni());
@@ -62,18 +63,12 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
         try {
             System.out.println("📨 Ricevuta richiesta: " + request.getTipo() + " da cliente: " + request.getIdCliente());
 
-            // ✅ Converte la richiesta gRPC in DTO
             RichiestaDTO richiestaDTO = GrpcMapper.toDTO(request);
-
-            // ✅ Processa la richiesta tramite il handler
             RispostaDTO rispostaDTO = requestHandler.gestisci(richiestaDTO);
-
-            // ✅ Converte la risposta DTO in gRPC
             RispostaGrpc rispostaGrpc = GrpcMapper.fromDTO(rispostaDTO);
 
             System.out.println("📤 Risposta inviata: " + rispostaDTO.getEsito() + " - " + rispostaDTO.getMessaggio());
 
-            // ✅ Invia la risposta al client
             responseObserver.onNext(rispostaGrpc);
             responseObserver.onCompleted();
 
@@ -98,10 +93,10 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
         try {
             System.out.println("🎉 Nuovo client collegato per stream promozioni: " + clientId);
 
-            // ✅ Registra lo stream
+            // Registra lo stream
             promozioniStreams.put(clientId, responseObserver);
 
-            // ✅ Invia le promozioni attive esistenti
+            // Invia le promozioni attive esistenti
             inviaPromozioniEsistenti(responseObserver);
 
             System.out.println("✅ Stream promozioni configurato per client: " + clientId);
@@ -124,14 +119,11 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
             System.out.println("📡 Iscrizione notifiche tratta: " + request.getEmailCliente() +
                     " per tratta: " + request.getTrattaId());
 
-            // ✅ Valida l'UUID della tratta
             UUID trattaId = UUID.fromString(request.getTrattaId());
 
-            // ✅ Registra il client per le notifiche della tratta
             notificheStreams.put(clientKey, responseObserver);
             notificaDispatcher.registraOsservatore(trattaId, responseObserver);
 
-            // ✅ Invia messaggio di conferma iscrizione
             NotificaTrattaGrpc conferma = NotificaTrattaGrpc.newBuilder()
                     .setMessaggio("✅ Iscrizione completata per la tratta " + request.getTrattaId())
                     .build();
@@ -150,9 +142,71 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
         }
     }
 
+    // ================================================================================
+    // 🚀 METODI PUBBLICI per Broadcast Promozioni Reali (chiamati da NotificaEventiListener)
+    // ================================================================================
+
     /**
-     * ✅ Metodo helper per inviare errori in modo consistente
+     * ✅ METODO PUBBLICO - Broadcast promozione creata da admin console
+     *
+     * Chiamato da NotificaEventiListener quando riceve EventoPromoGen/EventoPromoFedelta
      */
+    public void broadcastPromozione(PromozioneDTO promo) {
+        if (promozioniStreams.isEmpty()) {
+            System.out.println("⚠️ Nessun client connesso per ricevere promozioni");
+            return;
+        }
+
+        System.out.println("📡 BROADCAST PROMOZIONE REALE: " + promo.getNome());
+
+        PromozioneGrpc promoGrpc = PromozioneGrpc.newBuilder()
+                .setNome(promo.getNome())
+                .setDescrizione(promo.getDescrizione())
+                .setDataInizio(promo.getDataInizio().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .setDataFine(promo.getDataFine().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .build();
+
+        // Rimuovi connessioni morte e invia a quelle attive
+        int clientiConnessi = promozioniStreams.size();
+        promozioniStreams.entrySet().removeIf(entry -> {
+            try {
+                entry.getValue().onNext(promoGrpc);
+                return false; // Mantieni la connessione
+            } catch (Exception e) {
+                System.err.println("❌ Rimossa connessione promozioni inattiva: " + entry.getKey());
+                return true; // Rimuovi la connessione
+            }
+        });
+
+        System.out.println("✅ Promozione REALE inviata a " + promozioniStreams.size() + "/" + clientiConnessi + " client");
+    }
+
+    /**
+     * ✅ METODO PUBBLICO - Broadcast promozione per tratte specifiche
+     */
+    public void broadcastPromozioneTratta(PromozioneDTO promo, java.util.Set<UUID> tratteDestinate) {
+        System.out.println("🚂 BROADCAST PROMOZIONE TRATTA: " + promo.getNome() +
+                " per " + tratteDestinate.size() + " tratte");
+
+        // Broadcast generale a tutti i client
+        broadcastPromozione(promo);
+
+        // TODO: Se in futuro vuoi notifiche tratta-specifiche,
+        // puoi usare notificaDispatcher per inviare a client iscritti a tratte specifiche
+    }
+
+    /**
+     * ✅ METODO PUBBLICO - Ottieni statistiche stream attivi
+     */
+    public String getStreamStats() {
+        return String.format("📊 Stream Attivi: Promozioni=%d, Notifiche=%d",
+                promozioniStreams.size(), notificheStreams.size());
+    }
+
+    // ================================================================================
+    // 🔧 METODI PRIVATI di supporto
+    // ================================================================================
+
     private void inviaErrore(StreamObserver<RispostaGrpc> responseObserver, String messaggio) {
         RispostaGrpc errore = RispostaGrpc.newBuilder()
                 .setEsito("KO")
@@ -167,9 +221,6 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
         }
     }
 
-    /**
-     * ✅ Invia le promozioni attualmente attive al nuovo client
-     */
     private void inviaPromozioniEsistenti(StreamObserver<PromozioneGrpc> responseObserver) {
         try {
             var promozioniAttive = memoriaPromozioni.getPromozioniAttive();
@@ -195,10 +246,10 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
     }
 
     /**
-     * ✅ Simulatore di promozioni per testing
+     * 🧪 SIMULATORE per testing (genera promozioni fittizie)
      */
-    private void avviaSimulatorePromozioni() {
-        // ✅ Simula nuove promozioni ogni 60 secondi
+    /*private void avviaSimulatorePromozioni() {
+        // Simula nuove promozioni ogni 2 minuti (solo per demo)
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 if (!promozioniStreams.isEmpty()) {
@@ -207,67 +258,34 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
             } catch (Exception e) {
                 System.err.println("❌ Errore generazione promozione test: " + e.getMessage());
             }
-        }, 30, 60, TimeUnit.SECONDS);
+        }, 60, 120, TimeUnit.SECONDS); // Ogni 2 minuti
 
-        System.out.println("✅ Simulatore promozioni avviato (ogni 60s)");
+        System.out.println("🧪 Simulatore promozioni test avviato (ogni 2 min)");
     }
 
-    /**
-     * ✅ Genera una promozione di test
-     */
     private void generaPromozioneTest() {
         String[] nomiPromo = {
-                "Sconto Estivo", "Offerta Weekend", "Promo Fedeltà",
-                "Super Risparmio", "Viaggio Conveniente"
+                "Test Sconto Estivo", "Test Offerta Weekend", "Test Promo Demo"
         };
 
         String nome = nomiPromo[(int) (Math.random() * nomiPromo.length)];
         LocalDateTime ora = LocalDateTime.now();
 
         PromozioneDTO promo = new PromozioneDTO(
-                nome,
-                "Sconto speciale del " + (10 + (int)(Math.random() * 30)) + "%",
+                "[TEST] " + nome,
+                "Promozione di test generata automaticamente",
                 ora,
-                ora.plusDays(7)
+                ora.plusDays(3)
         );
 
-        // ✅ Notifica tramite sistema eventi
+        // Notifica sistema eventi client
         ListaEventi.getInstance().notifica(new EventoPromozione(promo));
 
-        // ✅ Invia a tutti i client collegati allo stream
+        // Broadcast a client gRPC
         broadcastPromozione(promo);
 
-        System.out.println("🎉 Promozione generata: " + nome);
-    }
-
-    /**
-     * ✅ Invia una promozione a tutti i client collegati
-     */
-    public void broadcastPromozione(PromozioneDTO promo) {
-        if (promozioniStreams.isEmpty()) {
-            return;
-        }
-
-        PromozioneGrpc promoGrpc = PromozioneGrpc.newBuilder()
-                .setNome(promo.getNome())
-                .setDescrizione(promo.getDescrizione())
-                .setDataInizio(promo.getDataInizio().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .setDataFine(promo.getDataFine().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .build();
-
-        // ✅ Rimuovi connessioni morte e invia a quelle attive
-        promozioniStreams.entrySet().removeIf(entry -> {
-            try {
-                entry.getValue().onNext(promoGrpc);
-                return false; // Mantieni la connessione
-            } catch (Exception e) {
-                System.err.println("❌ Rimossa connessione promozioni inattiva: " + entry.getKey());
-                return true; // Rimuovi la connessione
-            }
-        });
-
-        System.out.println("📡 Promozione inviata a " + promozioniStreams.size() + " client");
-    }
+        System.out.println("🧪 Promozione TEST generata: " + nome);
+    }*/
 
     /**
      * ✅ Cleanup delle risorse quando il servizio viene fermato
@@ -275,7 +293,7 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
     public void shutdown() {
         System.out.println("🛑 Shutdown TrenicalService...");
 
-        // ✅ Chiudi tutti gli stream attivi
+        // Chiudi tutti gli stream attivi
         promozioniStreams.values().forEach(stream -> {
             try {
                 stream.onCompleted();
@@ -292,7 +310,6 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
             }
         });
 
-        // ✅ Ferma lo scheduler
         scheduler.shutdown();
         try {
             if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
@@ -304,18 +321,5 @@ public class TrenicalServiceImpl extends TrenicalServiceImplBase {
         }
 
         System.out.println("✅ TrenicalService shutdown completato");
-    }
-
-    /**
-     * ✅ Statistiche del servizio
-     */
-    public String getStats() {
-        return String.format("📊 TrenicalService Stats:\n" +
-                        "   - Stream promozioni attivi: %d\n" +
-                        "   - Stream notifiche attivi: %d\n" +
-                        "   - Scheduler running: %s",
-                promozioniStreams.size(),
-                notificheStreams.size(),
-                !scheduler.isShutdown());
     }
 }

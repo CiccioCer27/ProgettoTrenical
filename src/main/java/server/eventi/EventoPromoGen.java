@@ -14,16 +14,10 @@ public class EventoPromoGen implements EventoS {
     }
 
     @Override
-    public TipoEvento getTipo() {
-        return TipoEvento.PROMO_GENERALE;
-    }
+    public TipoEvento getTipo() { return TipoEvento.PROMO_GENERALE; }
 
     @Override
-    public Set<UUID> getDestinatari() {
-        return Collections.emptySet(); // tutti i clienti
-    }
+    public Set<UUID> getDestinatari() { return Collections.emptySet(); }
 
-    public Promozione getPromozione() {
-        return promozione;
-    }
+    public Promozione getPromozione() { return promozione; }
 }

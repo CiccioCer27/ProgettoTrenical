@@ -12,13 +12,14 @@ import model.Biglietto;
 import model.Tratta;
 import persistence.MemoriaBiglietti;
 import persistence.MemoriaTratte;
+import persistence.MemoriaOsservatori;  // ✅ AGGIUNTO
 import service.BancaServiceClient;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * 🔒 CONFERMA THREAD-SAFE
+ * 🔒 CONFERMA BIGLIETTO COMMAND - CON AUTO-ISCRIZIONE gRPC
  */
 public class ConfermaBigliettoCommand implements ServerCommand {
 
@@ -26,26 +27,21 @@ public class ConfermaBigliettoCommand implements ServerCommand {
     private final MemoriaBiglietti memoria;
     private final BancaServiceClient banca;
     private final MemoriaTratte memoriaTratte;
+    private final MemoriaOsservatori memoriaOsservatori;  // ✅ AGGIUNTO
 
     public ConfermaBigliettoCommand(RichiestaDTO richiesta, MemoriaBiglietti memoria,
-                                    BancaServiceClient banca) {
-        this.richiesta = richiesta;
-        this.memoria = memoria;
-        this.banca = banca;
-        this.memoriaTratte = null;
-    }
-
-    public ConfermaBigliettoCommand(RichiestaDTO richiesta, MemoriaBiglietti memoria,
-                                    BancaServiceClient banca, MemoriaTratte memoriaTratte) {
+                                    BancaServiceClient banca, MemoriaTratte memoriaTratte,
+                                    MemoriaOsservatori memoriaOsservatori) {  // ✅ NUOVO PARAMETRO
         this.richiesta = richiesta;
         this.memoria = memoria;
         this.banca = banca;
         this.memoriaTratte = memoriaTratte;
+        this.memoriaOsservatori = memoriaOsservatori;  // ✅ INJECTION
     }
 
     @Override
     public RispostaDTO esegui() {
-        System.out.println("🔍 DEBUG CONFERMA THREAD-SAFE: Iniziando conferma");
+        System.out.println("🔍 DEBUG CONFERMA con AUTO-ISCRIZIONE: Iniziando conferma");
 
         BigliettoDTO bigliettoPrenotato = richiesta.getBiglietto();
         if (bigliettoPrenotato == null) {
@@ -82,6 +78,16 @@ public class ConfermaBigliettoCommand implements ServerCommand {
 
         System.out.println("✅ DEBUG CONFERMA: Prenotazione confermata atomicamente");
 
+        // 📡 ✅ ENSURE AUTO-ISCRIZIONE alle notifiche (conferma che sia attiva)
+        try {
+            // Il cliente dovrebbe già essere iscritto dalla prenotazione,
+            // ma assicuriamoci che l'iscrizione sia attiva
+            memoriaOsservatori.aggiungiOsservatore(bigliettoModel.getIdTratta(), bigliettoModel.getIdCliente());
+            System.out.println("📡 ✅ Confermata iscrizione notifiche per biglietto confermato");
+        } catch (Exception e) {
+            System.err.println("⚠️ Errore conferma iscrizione notifiche (non critico): " + e.getMessage());
+        }
+
         // Il biglietto confermato ha lo stesso ID ma tipo diverso
         Biglietto confermato = new Biglietto(
                 bigliettoModel.getId(), // Stesso ID
@@ -112,7 +118,7 @@ public class ConfermaBigliettoCommand implements ServerCommand {
                 StatoBiglietto.CONFERMATO
         );
 
-        return new RispostaDTO("OK", "✅ Biglietto confermato", bigliettoDTO);
+        return new RispostaDTO("OK", "✅ Biglietto confermato + notifiche attive", bigliettoDTO);
     }
 
     private TrattaDTO createMinimalTrattaDTO(UUID idTratta) {

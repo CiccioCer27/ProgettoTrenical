@@ -8,9 +8,18 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * 👁️ MEMORIA OSSERVATORI - Updated per consistency
+ *
+ * MIGLIORAMENTO: Usa ObjectMapper con stessa configurazione di Base
+ */
 public class MemoriaOsservatori {
     private static final String PATH = "src/main/resources/data/osservatoriTratte.json";
-    private static final ObjectMapper mapper = new ObjectMapper();
+
+    // ✅ MIGLIORAMENTO: Usa ObjectMapper configurato come BasePersistenceManager
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private final Map<UUID, Set<UUID>> osservatori = new HashMap<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -30,7 +39,7 @@ public class MemoriaOsservatori {
                 });
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("❌ Errore caricamento osservatori: " + e.getMessage());
         }
     }
 
@@ -55,6 +64,10 @@ public class MemoriaOsservatori {
 
     private void salva() {
         try {
+            // ✅ MIGLIORAMENTO: Crea directory se non esiste
+            File file = new File(PATH);
+            file.getParentFile().mkdirs();
+
             // converto per serializzare come Map<String, List<String>>
             Map<String, List<String>> serializableMap = new HashMap<>();
             for (Map.Entry<UUID, Set<UUID>> entry : osservatori.entrySet()) {
@@ -64,9 +77,9 @@ public class MemoriaOsservatori {
                 }
                 serializableMap.put(entry.getKey().toString(), lista);
             }
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(PATH), serializableMap);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, serializableMap);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("❌ Errore salvataggio osservatori: " + e.getMessage());
         }
     }
 }

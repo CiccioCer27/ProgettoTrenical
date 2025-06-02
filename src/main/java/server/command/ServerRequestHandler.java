@@ -23,6 +23,7 @@ public class ServerRequestHandler {
     private final MemoriaClientiFedeli memoriaClienti;
     private final MemoriaTratte memoriaTratte;
     private final BancaServiceClient banca;
+    private final MemoriaOsservatori memoriaOsservatori;
 
     /**
      * Constructor SEMPLIFICATO - Senza EventDispatcher per persistenza
@@ -31,11 +32,12 @@ public class ServerRequestHandler {
      * Gli eventi per notifiche cross-domain sono gestiti via ListaEventiS quando necessario.
      */
     public ServerRequestHandler(MemoriaBiglietti mb, MemoriaClientiFedeli mc, MemoriaTratte mt,
-                                BancaServiceClient banca) {
+                                BancaServiceClient banca,MemoriaOsservatori mobs) {
         this.memoriaBiglietti = mb;
         this.memoriaClienti = mc;
         this.memoriaTratte = mt;
         this.banca = banca;
+        this.memoriaOsservatori=mobs;
     }
 
     /**
@@ -55,27 +57,26 @@ public class ServerRequestHandler {
                     System.out.println("✅ DEBUG: Creando AcquistaBigliettoCommand THREAD-SAFE");
                     // ✅ REFACTORED: Senza EventDispatcher - Command ha responsabilità diretta
                     yield new AcquistaBigliettoCommand(
-                            richiesta, memoriaBiglietti, memoriaClienti, memoriaTratte, banca
+                            richiesta, memoriaBiglietti, memoriaClienti, memoriaTratte,memoriaOsservatori, banca
                     );
                 }
                 case "PRENOTA" -> {
                     System.out.println("✅ DEBUG: Creando PrenotaBigliettoCommand THREAD-SAFE");
                     // ✅ REFACTORED: Senza EventDispatcher - Command ha responsabilità diretta
                     yield new PrenotaBigliettoCommand(
-                            richiesta, memoriaBiglietti, memoriaTratte, memoriaClienti
+                            richiesta, memoriaBiglietti, memoriaTratte, memoriaClienti,memoriaOsservatori
                     );
                 }
                 case "MODIFICA" -> {
                     System.out.println("✅ DEBUG: Creando ModificaBigliettoCommand THREAD-SAFE");
                     // ✅ REFACTORED: Senza EventDispatcher - Command ha responsabilità diretta
                     yield new ModificaBigliettoCommand(
-                            richiesta, memoriaBiglietti, memoriaClienti, memoriaTratte, banca
-                    );
+                            richiesta, memoriaBiglietti, memoriaClienti, memoriaTratte,memoriaOsservatori,banca);
                 }
                 case "CONFERMA" -> {
                     System.out.println("✅ DEBUG: Creando ConfermaBigliettoCommand THREAD-SAFE");
                     // ✅ REFACTORED: Senza EventDispatcher - Command ha responsabilità diretta
-                    yield new ConfermaBigliettoCommand(richiesta, memoriaBiglietti, banca);
+                    yield new ConfermaBigliettoCommand(richiesta, memoriaBiglietti,banca,memoriaTratte,memoriaOsservatori);
                 }
                 case "CARTA_FEDELTA" -> {
                     System.out.println("✅ DEBUG: Creando CartaFedeltaCommand THREAD-SAFE");

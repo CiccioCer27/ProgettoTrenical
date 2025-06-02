@@ -14,16 +14,10 @@ public class EventoPromoFedelta implements EventoS {
     }
 
     @Override
-    public TipoEvento getTipo() {
-        return TipoEvento.PROMO_FEDELTA;
-    }
+    public TipoEvento getTipo() { return TipoEvento.PROMO_FEDELTA; }
 
     @Override
-    public Set<UUID> getDestinatari() {
-        return Collections.emptySet(); // oppure: clienti con carta fedeltà
-    }
+    public Set<UUID> getDestinatari() { return Collections.emptySet(); }
 
-    public PromozioneFedelta getPromozione() {
-        return promozione;
-    }
+    public PromozioneFedelta getPromozione() { return promozione; }
 }

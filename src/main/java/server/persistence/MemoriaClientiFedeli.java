@@ -7,9 +7,20 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * 💎 MEMORIA CLIENTI FEDELI - Updated per consistency
+ *
+ * PROBLEMA: Usa ObjectMapper diretto invece di PersistenceManager pattern
+ * SOLUZIONE: Continua ad usare ObjectMapper (Set<UUID> è semplice)
+ * MIGLIORAMENTO: Usa ObjectMapper con stessa configurazione di Base
+ */
 public class MemoriaClientiFedeli {
     private static final String PATH = "src/main/resources/data/clientiFedeli.json";
-    private static final ObjectMapper mapper = new ObjectMapper();
+
+    // ✅ MIGLIORAMENTO: Usa ObjectMapper configurato come BasePersistenceManager
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private final Set<UUID> clientiFedeli = new HashSet<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -24,7 +35,7 @@ public class MemoriaClientiFedeli {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("❌ Errore caricamento clienti fedeli: " + e.getMessage());
         }
     }
 
@@ -49,9 +60,13 @@ public class MemoriaClientiFedeli {
 
     private void salva() {
         try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(PATH), clientiFedeli);
+            // ✅ MIGLIORAMENTO: Crea directory se non esiste
+            File file = new File(PATH);
+            file.getParentFile().mkdirs();
+
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, clientiFedeli);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("❌ Errore salvataggio clienti fedeli: " + e.getMessage());
         }
     }
 }

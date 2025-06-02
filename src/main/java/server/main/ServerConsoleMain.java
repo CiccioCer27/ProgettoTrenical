@@ -40,6 +40,7 @@ public class ServerConsoleMain {
     private static MemoriaClientiFedeli memoriaClientiFedeli;
     private static MemoriaTratte memoriaTratte;
     private static MemoriaPromozioni memoriaPromozioni;
+    private static MemoriaOsservatori memoriaOsservatori;
 
     public static void main(String[] args) {
         System.out.println("🖥️ ===== TRENICAL SERVER CONSOLE - VERSIONE THREAD-SAFE =====");
@@ -101,7 +102,7 @@ public class ServerConsoleMain {
 
         // ✅ CORREZIONE: Usa il nuovo costruttore ServerRequestHandler
         ServerRequestHandler handler = new ServerRequestHandler(
-                memoriaBiglietti, memoriaClientiFedeli, memoriaTratte, bancaClient
+                memoriaBiglietti, memoriaClientiFedeli, memoriaTratte, bancaClient,memoriaOsservatori
         );
 
         // 5. Solo notifiche gRPC (senza eventi interni complessi)

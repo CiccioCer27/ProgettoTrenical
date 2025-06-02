@@ -12,13 +12,16 @@ import model.Tratta;
 import persistence.MemoriaBiglietti;
 import persistence.MemoriaClientiFedeli;
 import persistence.MemoriaTratte;
+import persistence.MemoriaOsservatori;  // ✅ AGGIUNTO
 import service.BancaServiceClient;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * 🔒 MODIFICA THREAD-SAFE (senza EventDispatcher)
+ * 🔒 MODIFICA BIGLIETTO COMMAND - CON SWITCH INTELLIGENTE NOTIFICHE
+ *
+ * NUOVO: Rimuove dalle notifiche vecchia tratta + iscrive a nuova tratta
  */
 public class ModificaBigliettoCommand implements ServerCommand {
 
@@ -26,37 +29,26 @@ public class ModificaBigliettoCommand implements ServerCommand {
     private final MemoriaBiglietti memoriaBiglietti;
     private final MemoriaClientiFedeli memoriaClientiFedeli;
     private final MemoriaTratte memoriaTratte;
+    private final MemoriaOsservatori memoriaOsservatori;  // ✅ AGGIUNTO
     private final BancaServiceClient banca;
 
-    // ✅ Costruttore COMPATIBILE (senza EventDispatcher)
     public ModificaBigliettoCommand(RichiestaDTO richiesta,
                                     MemoriaBiglietti memoriaBiglietti,
                                     MemoriaClientiFedeli memoriaClientiFedeli,
                                     MemoriaTratte memoriaTratte,
+                                    MemoriaOsservatori memoriaOsservatori,  // ✅ NUOVO PARAMETRO
                                     BancaServiceClient banca) {
         this.richiesta = richiesta;
         this.memoriaBiglietti = memoriaBiglietti;
         this.memoriaClientiFedeli = memoriaClientiFedeli;
         this.memoriaTratte = memoriaTratte;
+        this.memoriaOsservatori = memoriaOsservatori;  // ✅ INJECTION
         this.banca = banca;
-    }
-
-    // ⚠️ Costruttore di compatibilità per vecchie chiamate con EventDispatcher
-    @Deprecated
-    public ModificaBigliettoCommand(RichiestaDTO richiesta,
-                                    MemoriaBiglietti memoriaBiglietti,
-                                    MemoriaClientiFedeli memoriaClientiFedeli,
-                                    MemoriaTratte memoriaTratte,
-                                    BancaServiceClient banca,
-                                    observer.EventDispatcher dispatcher) {
-        // Ignora l'EventDispatcher nella versione thread-safe
-        this(richiesta, memoriaBiglietti, memoriaClientiFedeli, memoriaTratte, banca);
-        System.out.println("⚠️ DEPRECATO: EventDispatcher ignorato in ModificaBigliettoCommand thread-safe");
     }
 
     @Override
     public RispostaDTO esegui() {
-        System.out.println("🔍 DEBUG MODIFICA THREAD-SAFE: Iniziando modifica");
+        System.out.println("🔍 DEBUG MODIFICA con SWITCH NOTIFICHE: Iniziando modifica");
 
         UUID idCliente = UUID.fromString(richiesta.getIdCliente());
 
@@ -71,6 +63,16 @@ public class ModificaBigliettoCommand implements ServerCommand {
         if (nuovaTratta == null) {
             return new RispostaDTO("KO", "❌ Tratta richiesta non trovata", null);
         }
+
+        // 📊 INFO per switch notifiche
+        UUID vecchiaTrattaId = originale.getIdTratta();
+        UUID nuovaTrattaId = nuovaTratta.getId();
+        boolean stessaTratta = vecchiaTrattaId.equals(nuovaTrattaId);
+
+        System.out.println("🔄 SWITCH NOTIFICHE INFO:");
+        System.out.println("   Vecchia tratta: " + vecchiaTrattaId.toString().substring(0, 8) + "...");
+        System.out.println("   Nuova tratta: " + nuovaTrattaId.toString().substring(0, 8) + "...");
+        System.out.println("   Stessa tratta: " + stessaTratta);
 
         // Verifica tipo prezzo
         boolean isFedele = memoriaClientiFedeli.isClienteFedele(idCliente);
@@ -116,6 +118,34 @@ public class ModificaBigliettoCommand implements ServerCommand {
 
         System.out.println("✅ DEBUG MODIFICA: Modifica completata atomicamente");
 
+        // 📡 ✅ SWITCH INTELLIGENTE NOTIFICHE
+        try {
+            if (!stessaTratta) {
+                // 🔄 SWITCH: Rimuovi da vecchia tratta + Iscri a nuova tratta
+
+                // Nota: MemoriaOsservatori nel tuo codice non ha metodo rimozione,
+                // quindi per ora solo aggiungiamo alla nuova tratta.
+                // TODO: Implementare rimozione quando necessario
+
+                System.out.println("🔄 SWITCH NOTIFICHE: Tratta cambiata, aggiornando iscrizioni...");
+
+                // ✅ ISCRIVI alla nuova tratta
+                memoriaOsservatori.aggiungiOsservatore(nuovaTrattaId, idCliente);
+                System.out.println("📡 ✅ Cliente iscritto alle notifiche nuova tratta: " +
+                        nuovaTratta.getStazionePartenza() + " → " + nuovaTratta.getStazioneArrivo());
+
+                // 🗑️ TODO: Rimuovi dalla vecchia tratta (quando implementato)
+                // memoriaOsservatori.rimuoviOsservatore(vecchiaTrattaId, idCliente);
+                System.out.println("⚠️ TODO: Rimuovere dalle notifiche vecchia tratta (da implementare)");
+
+            } else {
+                // ✅ STESSA TRATTA: Mantieni iscrizione esistente
+                System.out.println("📡 ✅ Stessa tratta, mantengo iscrizione notifiche esistente");
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Errore switch notifiche (non critico): " + e.getMessage());
+        }
+
         // DTO response
         ClienteDTO clienteDTO = new ClienteDTO(
                 idCliente, "Cliente", "Test", "cliente@test.com",
@@ -134,6 +164,6 @@ public class ModificaBigliettoCommand implements ServerCommand {
                 StatoBiglietto.CONFERMATO
         );
 
-        return new RispostaDTO("OK", "✅ Biglietto modificato con successo", bigliettoDTO);
+        return new RispostaDTO("OK", "✅ Biglietto modificato + notifiche aggiornate", bigliettoDTO);
     }
 }

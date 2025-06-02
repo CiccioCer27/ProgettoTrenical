@@ -12,16 +12,16 @@ import model.Tratta;
 import persistence.MemoriaBiglietti;
 import persistence.MemoriaClientiFedeli;
 import persistence.MemoriaTratte;
+import persistence.MemoriaOsservatori;  // ✅ AGGIUNTO
 import service.BancaServiceClient;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * 🔒 VERSIONE THREAD-SAFE
+ * 🔒 ACQUISTA BIGLIETTO COMMAND - CON AUTO-ISCRIZIONE NOTIFICHE
  *
- * Risolve il problema di overselling delegando completamente
- * il controllo capienza alla MemoriaBiglietti in modo atomico.
+ * NUOVO: Auto-iscrizione automatica alle notifiche della tratta acquistata
  */
 public class AcquistaBigliettoCommand implements ServerCommand {
 
@@ -29,6 +29,7 @@ public class AcquistaBigliettoCommand implements ServerCommand {
     private final MemoriaBiglietti memoriaBiglietti;
     private final MemoriaClientiFedeli memoriaFedeli;
     private final MemoriaTratte memoriaTratte;
+    private final MemoriaOsservatori memoriaOsservatori;  // ✅ AGGIUNTO
     private final BancaServiceClient banca;
 
     public AcquistaBigliettoCommand(
@@ -36,18 +37,20 @@ public class AcquistaBigliettoCommand implements ServerCommand {
             MemoriaBiglietti mb,
             MemoriaClientiFedeli mf,
             MemoriaTratte mt,
+            MemoriaOsservatori mo,  // ✅ NUOVO PARAMETRO
             BancaServiceClient b
     ) {
         this.richiesta = richiesta;
         this.memoriaBiglietti = mb;
         this.memoriaFedeli = mf;
         this.memoriaTratte = mt;
+        this.memoriaOsservatori = mo;  // ✅ INJECTION
         this.banca = b;
     }
 
     @Override
     public RispostaDTO esegui() {
-        System.out.println("🔍 DEBUG THREAD-SAFE: Iniziando acquisto");
+        System.out.println("🔍 DEBUG ACQUISTO con AUTO-ISCRIZIONE: Iniziando acquisto");
 
         UUID idCliente = UUID.fromString(richiesta.getIdCliente());
         Tratta tratta = memoriaTratte.getTrattaById(richiesta.getTratta().getId());
@@ -55,10 +58,6 @@ public class AcquistaBigliettoCommand implements ServerCommand {
         if (tratta == null) {
             return new RispostaDTO("KO", "❌ Tratta non trovata", null);
         }
-
-        // ⚠️ RIMUOVI IL CONTROLLO CAPIENZA QUI - Era questo il problema!
-        // NON fare più questo controllo che causa race condition:
-        // long postiOccupati = memoriaBiglietti.getTuttiIBiglietti().stream()...
 
         // Verifica tipo prezzo
         boolean isFedele = memoriaFedeli.isClienteFedele(idCliente);
@@ -72,8 +71,7 @@ public class AcquistaBigliettoCommand implements ServerCommand {
 
         System.out.println("💰 DEBUG: Prezzo calcolato: €" + prezzo);
 
-        // 🔒 TENTATIVO DI PRENOTAZIONE ATOMICA
-        // Crea il biglietto prima del pagamento per testare la capienza
+        // Crea biglietto
         Biglietto biglietto = new Biglietto.Builder()
                 .idCliente(idCliente)
                 .idTratta(tratta.getId())
@@ -84,7 +82,7 @@ public class AcquistaBigliettoCommand implements ServerCommand {
                 .tipoAcquisto("acquisto")
                 .build();
 
-        // 🎯 CONTROLLO ATOMICO CAPIENZA + PRENOTAZIONE POSTO
+        // 🔒 CONTROLLO ATOMICO CAPIENZA + PRENOTAZIONE POSTO
         int capienza = tratta.getTreno().getCapienzaTotale();
         boolean postoRiservato = memoriaBiglietti.aggiungiSeSpazioDiponibile(biglietto, capienza);
 
@@ -95,11 +93,11 @@ public class AcquistaBigliettoCommand implements ServerCommand {
 
         System.out.println("✅ DEBUG: Posto riservato atomicamente, procedo con pagamento");
 
-        // 💳 PAGAMENTO (dopo aver riservato il posto)
+        // 💳 PAGAMENTO
         boolean esitoPagamento = banca.paga(idCliente.toString(), prezzo, "Pagamento biglietto");
 
         if (!esitoPagamento) {
-            // ⚠️ ROLLBACK: Rimuovi il biglietto se il pagamento fallisce
+            // Rollback: rimuovi il biglietto se il pagamento fallisce
             memoriaBiglietti.rimuoviBiglietto(biglietto.getId());
             System.out.println("❌ DEBUG: Pagamento fallito, posto rilasciato");
             return new RispostaDTO("KO", "❌ Pagamento fallito", null);
@@ -107,7 +105,16 @@ public class AcquistaBigliettoCommand implements ServerCommand {
 
         System.out.println("✅ DEBUG: Pagamento riuscito, biglietto confermato");
 
-        // 🎫 CONVERSIONE A DTO
+        // 📡 ✅ AUTO-ISCRIZIONE alle notifiche della tratta acquistata
+        try {
+            memoriaOsservatori.aggiungiOsservatore(tratta.getId(), idCliente);
+            System.out.println("📡 ✅ Cliente automaticamente iscritto alle notifiche tratta: " +
+                    tratta.getStazionePartenza() + " → " + tratta.getStazioneArrivo());
+        } catch (Exception e) {
+            System.err.println("⚠️ Errore auto-iscrizione notifiche (non critico): " + e.getMessage());
+        }
+
+        // Conversione a DTO
         ClienteDTO clienteDTO = new ClienteDTO(
                 idCliente, "Cliente", "Test", "cliente@test.com",
                 isFedele, 0, "", 0, ""
@@ -125,6 +132,6 @@ public class AcquistaBigliettoCommand implements ServerCommand {
                 StatoBiglietto.CONFERMATO
         );
 
-        return new RispostaDTO("OK", "✅ Acquisto completato", bigliettoDTO);
+        return new RispostaDTO("OK", "✅ Acquisto completato + notifiche attive", bigliettoDTO);
     }
 }
