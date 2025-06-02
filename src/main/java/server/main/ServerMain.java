@@ -7,7 +7,7 @@ import grpc.TrenicalServiceImpl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import model.Tratta;
-import observer.*;
+import observer.GrpcNotificaDispatcher;
 import persistence.*;
 import service.BancaServiceClient;
 
@@ -17,7 +17,10 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Classe principale per avviare il server TreniCal
+ * 🔒 SERVER MAIN THREAD-SAFE
+ *
+ * Versione semplificata che rimuove l'EventDispatcher
+ * per eliminare le race conditions.
  */
 public class ServerMain {
 
@@ -25,66 +28,61 @@ public class ServerMain {
     private static final int BANCA_PORT = 9091;
 
     public static void main(String[] args) throws Exception {
-        System.out.println("🔥 DEBUG: Server avviato con modifiche debug!");
-        System.out.println("🚀 Avvio Server TreniCal");
+        System.out.println("🔒 AVVIO SERVER TRENICAL THREAD-SAFE");
 
-        // 1️⃣ Avvia il server della banca
+        // 1️⃣ Server Banca
         Server bancaServer = ServerBuilder.forPort(BANCA_PORT)
                 .addService(new BancaServiceImpl())
                 .build()
                 .start();
         System.out.println("✅ Server Banca avviato sulla porta " + BANCA_PORT);
 
-        // 2️⃣ Prepara le componenti del server principale
+        // 2️⃣ Componenti memoria THREAD-SAFE
         MemoriaBiglietti memoriaBiglietti = new MemoriaBiglietti();
         MemoriaClientiFedeli memoriaClienti = new MemoriaClientiFedeli();
         MemoriaTratte memoriaTratte = new MemoriaTratte();
         MemoriaPromozioni memoriaPromozioni = new MemoriaPromozioni();
 
-        // Genera alcune tratte di test se non ci sono
+        System.out.println("💾 Componenti memoria caricate (THREAD-SAFE):");
+        System.out.println("   🎫 Biglietti: " + memoriaBiglietti.getTuttiIBiglietti().size());
+        System.out.println("   🚂 Tratte: " + memoriaTratte.getTutteTratte().size());
+
+        // Genera tratte se necessario
         if (memoriaTratte.getTutteTratte().isEmpty()) {
+            System.out.println("📋 Generazione tratte iniziali...");
             TrattaFactoryConcrete factory = new TrattaFactoryConcrete();
             for (int i = 1; i <= 3; i++) {
                 List<Tratta> tratteGiorno = factory.generaTratte(LocalDate.now().plusDays(i));
                 tratteGiorno.forEach(memoriaTratte::aggiungiTratta);
             }
-            System.out.println("✅ Generate tratte di test per i prossimi 3 giorni");
+            System.out.println("✅ Generate " + memoriaTratte.getTutteTratte().size() + " tratte");
         }
 
-        // Event system
-        EventDispatcher dispatcher = new EventDispatcher();
-        GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
-
-        // Registra listeners
-        dispatcher.registra(new MemoriaBigliettiListener(memoriaBiglietti, memoriaTratte));
-        dispatcher.registra(new MemoriaClientiFedeliListener(memoriaClienti));
-        dispatcher.registra(new EventoLoggerListener());
-        dispatcher.registra(new NotificaEventiListener(notificaDispatcher, memoriaTratte));
-
-        // Client per comunicare con la banca
+        // 3️⃣ Client banca e handler SEMPLIFICATO
         BancaServiceClient bancaClient = new BancaServiceClient("localhost", BANCA_PORT);
 
-        // Handler delle richieste
+        // ⚠️ IMPORTANTE: Niente EventDispatcher = Niente race conditions
         ServerRequestHandler handler = new ServerRequestHandler(
-                memoriaBiglietti, memoriaClienti, memoriaTratte, dispatcher, bancaClient
+                memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient
         );
 
-        // Service implementation
+        // 4️⃣ Solo notifiche gRPC (senza eventi interni)
+        GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
         TrenicalServiceImpl trenicalService = new TrenicalServiceImpl(
                 notificaDispatcher, handler, memoriaPromozioni
         );
 
-        // 3️⃣ Avvia il server principale
+        // 5️⃣ Server principale
         Server server = ServerBuilder.forPort(SERVER_PORT)
                 .addService(trenicalService)
                 .build()
                 .start();
 
-        System.out.println("✅ Server TreniCal avviato sulla porta " + SERVER_PORT);
-        System.out.println("📊 Tratte disponibili: " + memoriaTratte.getTutteTratte().size());
-        System.out.println("\n" + trenicalService.getStats());
+        System.out.println("✅ Server TreniCal THREAD-SAFE avviato sulla porta " + SERVER_PORT);
+        System.out.println("🔒 Modalità: CONTROLLO CAPIENZA ATOMICO ATTIVO");
+        System.out.println("📊 " + memoriaBiglietti.getStatistiche());
 
-        // 4️⃣ Gestisce lo shutdown graceful
+        // 6️⃣ Shutdown graceful
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("\n🛑 Shutdown signal ricevuto...");
             trenicalService.shutdown();
@@ -107,11 +105,11 @@ public class ServerMain {
             System.out.println("🏁 Server terminato correttamente");
         }));
 
-        // 5️⃣ Attendi input per terminare
+        // 7️⃣ Attendi terminazione
         System.out.println("\n⌨️  Premi INVIO per terminare il server...");
         new Scanner(System.in).nextLine();
 
-        // 6️⃣ Termina i server
+        // 8️⃣ Termina servers
         trenicalService.shutdown();
         server.shutdown();
         bancaServer.shutdown();
@@ -123,6 +121,6 @@ public class ServerMain {
             bancaServer.shutdownNow();
         }
 
-        System.out.println("🏁 Server terminato!");
+        System.out.println("🏁 Server THREAD-SAFE terminato!");
     }
 }

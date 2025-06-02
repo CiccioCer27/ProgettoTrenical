@@ -8,10 +8,8 @@ import dto.RispostaDTO;
 import dto.TrattaDTO;
 import enums.StatoBiglietto;
 import enums.TipoPrezzo;
-import eventi.EventoGdsAcquisto;
 import model.Biglietto;
 import model.Tratta;
-import observer.EventDispatcher;
 import persistence.MemoriaBiglietti;
 import persistence.MemoriaTratte;
 import service.BancaServiceClient;
@@ -19,52 +17,52 @@ import service.BancaServiceClient;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * 🔒 CONFERMA THREAD-SAFE
+ */
 public class ConfermaBigliettoCommand implements ServerCommand {
 
     private final RichiestaDTO richiesta;
     private final MemoriaBiglietti memoria;
     private final BancaServiceClient banca;
-    private final EventDispatcher dispatcher;
     private final MemoriaTratte memoriaTratte;
 
     public ConfermaBigliettoCommand(RichiestaDTO richiesta, MemoriaBiglietti memoria,
-                                    BancaServiceClient banca, EventDispatcher dispatcher) {
+                                    BancaServiceClient banca) {
         this.richiesta = richiesta;
         this.memoria = memoria;
         this.banca = banca;
-        this.dispatcher = dispatcher;
-        this.memoriaTratte = null; // Potrebbe servire se disponibile
+        this.memoriaTratte = null;
     }
 
-    // Costruttore alternativo con MemoriaTratte
     public ConfermaBigliettoCommand(RichiestaDTO richiesta, MemoriaBiglietti memoria,
-                                    BancaServiceClient banca, EventDispatcher dispatcher,
-                                    MemoriaTratte memoriaTratte) {
+                                    BancaServiceClient banca, MemoriaTratte memoriaTratte) {
         this.richiesta = richiesta;
         this.memoria = memoria;
         this.banca = banca;
-        this.dispatcher = dispatcher;
         this.memoriaTratte = memoriaTratte;
     }
 
     @Override
     public RispostaDTO esegui(RichiestaDTO r) {
-        BigliettoDTO bigliettoPrenotato = richiesta.getBiglietto();
+        System.out.println("🔍 DEBUG CONFERMA THREAD-SAFE: Iniziando conferma");
 
+        BigliettoDTO bigliettoPrenotato = richiesta.getBiglietto();
         if (bigliettoPrenotato == null) {
             return new RispostaDTO("KO", "❌ Biglietto non specificato", null);
         }
 
-        // Trova il biglietto prenotato nel sistema
+        // Trova prenotazione
         Biglietto bigliettoModel = memoria.getById(bigliettoPrenotato.getId());
         if (bigliettoModel == null) {
             return new RispostaDTO("KO", "❌ Prenotazione non trovata", null);
         }
 
-        // Rimuove la prenotazione
-        memoria.rimuoviBiglietto(bigliettoPrenotato.getId());
+        if (!"prenotazione".equals(bigliettoModel.getTipoAcquisto())) {
+            return new RispostaDTO("KO", "❌ Il biglietto non è una prenotazione", null);
+        }
 
-        // Comunica con la banca
+        // 💳 Pagamento
         boolean pagato = banca.paga(
                 bigliettoModel.getIdCliente().toString(),
                 bigliettoModel.getPrezzoPagato(),
@@ -72,46 +70,37 @@ public class ConfermaBigliettoCommand implements ServerCommand {
         );
 
         if (!pagato) {
-            // Ripristina la prenotazione se il pagamento fallisce
-            memoria.aggiungiBiglietto(bigliettoModel);
             return new RispostaDTO("KO", "❌ Pagamento non riuscito", null);
         }
 
-        // 🔧 CORREZIONE: Usa lo STESSO ID del biglietto prenotato
+        // 🔒 OPERAZIONE ATOMICA: Rimuovi prenotazione + Aggiungi confermato
+        boolean successo = memoria.confermaPrenotazione(bigliettoModel);
+
+        if (!successo) {
+            return new RispostaDTO("KO", "❌ Errore durante la conferma", null);
+        }
+
+        System.out.println("✅ DEBUG CONFERMA: Prenotazione confermata atomicamente");
+
+        // Il biglietto confermato ha lo stesso ID ma tipo diverso
         Biglietto confermato = new Biglietto(
-                bigliettoModel.getId(), // ⚠️ STESSO ID!
+                bigliettoModel.getId(), // Stesso ID
                 bigliettoModel.getIdCliente(),
                 bigliettoModel.getIdTratta(),
                 bigliettoModel.getClasse(),
                 bigliettoModel.isConCartaFedelta(),
                 bigliettoModel.getPrezzoPagato(),
-                LocalDate.now(), // Data conferma
-                "acquisto" // Tipo cambia da "prenotazione" a "acquisto"
+                LocalDate.now(),
+                "acquisto" // Cambia tipo
         );
 
-        // 🔧 FIX: SOLO l'evento salva il biglietto, NON salvare qui direttamente
-        // RIMUOVI: memoria.aggiungiBiglietto(confermato);
-
-        // Invia evento che si occuperà del salvataggio tramite MemoriaBigliettiListener
-        System.out.println("🔔 DEBUG CONFERMA: Inviando evento (che salverà il biglietto confermato)");
-        dispatcher.dispatch(new EventoGdsAcquisto(confermato));
-
-        // 🔧 CONVERSIONE A DTO
+        // DTO response
         ClienteDTO clienteDTO = new ClienteDTO(
-                confermato.getIdCliente(),
-                "Cliente", "Test", "cliente@test.com",
+                confermato.getIdCliente(), "Cliente", "Test", "cliente@test.com",
                 confermato.isConCartaFedelta(), 0, "", 0, ""
         );
 
-        // Crea TrattaDTO minimale o usa MemoriaTratte se disponibile
-        TrattaDTO trattaDTO;
-        if (memoriaTratte != null) {
-            Tratta tratta = memoriaTratte.getTrattaById(confermato.getIdTratta());
-            trattaDTO = tratta != null ? AssemblerTratta.toDTO(tratta) :
-                    createMinimalTrattaDTO(confermato.getIdTratta());
-        } else {
-            trattaDTO = createMinimalTrattaDTO(confermato.getIdTratta());
-        }
+        TrattaDTO trattaDTO = createMinimalTrattaDTO(confermato.getIdTratta());
 
         BigliettoDTO bigliettoDTO = new BigliettoDTO(
                 confermato.getId(),
