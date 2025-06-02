@@ -42,7 +42,7 @@ public class PrenotaBigliettoCommand implements ServerCommand {
     }
 
     @Override
-    public RispostaDTO esegui(RichiestaDTO r) {
+    public RispostaDTO esegui() {
         System.out.println("🔍 DEBUG PRENOTA THREAD-SAFE: Iniziando prenotazione");
 
         UUID idCliente = UUID.fromString(richiesta.getIdCliente());

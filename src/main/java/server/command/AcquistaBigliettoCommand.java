@@ -46,7 +46,7 @@ public class AcquistaBigliettoCommand implements ServerCommand {
     }
 
     @Override
-    public RispostaDTO esegui(RichiestaDTO r) {
+    public RispostaDTO esegui() {
         System.out.println("🔍 DEBUG THREAD-SAFE: Iniziando acquisto");
 
         UUID idCliente = UUID.fromString(richiesta.getIdCliente());

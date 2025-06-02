@@ -25,7 +25,7 @@ public class CartaFedeltaCommand implements ServerCommand {
     }
 
     @Override
-    public RispostaDTO esegui(RichiestaDTO ignored) {
+    public RispostaDTO esegui() {
         System.out.println("🔍 DEBUG CARTA FEDELTÀ THREAD-SAFE");
 
         UUID idCliente = UUID.fromString(richiesta.getIdCliente());

@@ -44,7 +44,7 @@ public class ConfermaBigliettoCommand implements ServerCommand {
     }
 
     @Override
-    public RispostaDTO esegui(RichiestaDTO r) {
+    public RispostaDTO esegui() {
         System.out.println("🔍 DEBUG CONFERMA THREAD-SAFE: Iniziando conferma");
 
         BigliettoDTO bigliettoPrenotato = richiesta.getBiglietto();

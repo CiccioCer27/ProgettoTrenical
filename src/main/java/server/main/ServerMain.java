@@ -8,6 +8,9 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import model.Tratta;
 import observer.GrpcNotificaDispatcher;
+import observer.NotificaEventiListener;
+import observer.EventoLoggerListener;
+import eventi.ListaEventiS;
 import persistence.*;
 import service.BancaServiceClient;
 
@@ -17,10 +20,14 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 🔒 SERVER MAIN THREAD-SAFE
+ * 🔒 SERVER MAIN THREAD-SAFE - OBSERVER PATTERN REFACTORED
  *
- * Versione semplificata che rimuove l'EventDispatcher
- * per eliminare le race conditions.
+ * DESIGN DECISION: Observer Pattern utilizzato SOLO per cross-cutting concerns:
+ * - Notifiche gRPC inter-servizio (NotificaEventiListener)
+ * - Audit e logging (EventoLoggerListener)
+ *
+ * La persistenza core è responsabilità diretta dei Command per evitare
+ * duplicazione e garantire atomicità delle operazioni.
  */
 public class ServerMain {
 
@@ -28,7 +35,7 @@ public class ServerMain {
     private static final int BANCA_PORT = 9091;
 
     public static void main(String[] args) throws Exception {
-        System.out.println("🔒 AVVIO SERVER TRENICAL THREAD-SAFE");
+        System.out.println("🔒 AVVIO SERVER TRENICAL THREAD-SAFE (Observer Refactored)");
 
         // 1️⃣ Server Banca
         Server bancaServer = ServerBuilder.forPort(BANCA_PORT)
@@ -58,21 +65,40 @@ public class ServerMain {
             System.out.println("✅ Generate " + memoriaTratte.getTutteTratte().size() + " tratte");
         }
 
-        // 3️⃣ Client banca e handler SEMPLIFICATO
+        // 3️⃣ Client banca e handler SEMPLIFICATO (SENZA EventDispatcher complesso)
         BancaServiceClient bancaClient = new BancaServiceClient("localhost", BANCA_PORT);
 
-        // ⚠️ IMPORTANTE: Niente EventDispatcher = Niente race conditions
+        // ✅ REFACTORED: Handler SENZA EventDispatcher per persistenza
+        // I Command si prendono la responsabilità diretta della persistenza
         ServerRequestHandler handler = new ServerRequestHandler(
                 memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient
         );
 
-        // 4️⃣ Solo notifiche gRPC (senza eventi interni)
+        // 4️⃣ Observer Pattern SOLO per Cross-Cutting Concerns
+        System.out.println("🔄 Configurazione Observer Pattern (Solo Cross-Cutting Concerns)...");
+
+        // Dispatcher per notifiche gRPC
         GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
+
+        // ✅ MANTIENI: Observer per notifiche inter-servizio
+        NotificaEventiListener notificaListener = new NotificaEventiListener(
+                notificaDispatcher, memoriaTratte);
+        ListaEventiS.getInstance().aggiungi(notificaListener);
+
+        // ✅ MANTIENI: Observer per audit/logging
+        EventoLoggerListener loggerListener = new EventoLoggerListener();
+        ListaEventiS.getInstance().aggiungi(loggerListener);
+
+        System.out.println("   ✅ NotificaEventiListener registrato (gRPC cross-domain)");
+        System.out.println("   ✅ EventoLoggerListener registrato (audit/logging)");
+        System.out.println("   ❌ Listener per persistenza core RIMOSSI (responsabilità Command)");
+
+        // 5️⃣ Servizio gRPC
         TrenicalServiceImpl trenicalService = new TrenicalServiceImpl(
                 notificaDispatcher, handler, memoriaPromozioni
         );
 
-        // 5️⃣ Server principale
+        // 6️⃣ Server principale
         Server server = ServerBuilder.forPort(SERVER_PORT)
                 .addService(trenicalService)
                 .build()
@@ -80,9 +106,10 @@ public class ServerMain {
 
         System.out.println("✅ Server TreniCal THREAD-SAFE avviato sulla porta " + SERVER_PORT);
         System.out.println("🔒 Modalità: CONTROLLO CAPIENZA ATOMICO ATTIVO");
+        System.out.println("🎯 Observer Pattern: SOLO Cross-Cutting Concerns");
         System.out.println("📊 " + memoriaBiglietti.getStatistiche());
 
-        // 6️⃣ Shutdown graceful
+        // 7️⃣ Shutdown graceful
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("\n🛑 Shutdown signal ricevuto...");
             trenicalService.shutdown();
@@ -105,11 +132,11 @@ public class ServerMain {
             System.out.println("🏁 Server terminato correttamente");
         }));
 
-        // 7️⃣ Attendi terminazione
+        // 8️⃣ Attendi terminazione
         System.out.println("\n⌨️  Premi INVIO per terminare il server...");
         new Scanner(System.in).nextLine();
 
-        // 8️⃣ Termina servers
+        // 9️⃣ Termina servers
         trenicalService.shutdown();
         server.shutdown();
         bancaServer.shutdown();
@@ -122,5 +149,6 @@ public class ServerMain {
         }
 
         System.out.println("🏁 Server THREAD-SAFE terminato!");
+        System.out.println("🎯 Observer Pattern Refactored: SUCCESS!");
     }
 }

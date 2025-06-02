@@ -23,8 +23,6 @@ public class AssemblerBiglietto {
                 stato
         );
     }
-
-    // Se vuoi anche il contrario, aggiungi questo metodo:
     public static Biglietto fromDTO(BigliettoDTO dto) {
         return new Biglietto.Builder()
                 .idCliente(dto.getCliente().getId())

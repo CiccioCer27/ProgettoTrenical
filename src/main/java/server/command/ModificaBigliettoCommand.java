@@ -55,7 +55,7 @@ public class ModificaBigliettoCommand implements ServerCommand {
     }
 
     @Override
-    public RispostaDTO esegui(RichiestaDTO ignored) {
+    public RispostaDTO esegui() {
         System.out.println("🔍 DEBUG MODIFICA THREAD-SAFE: Iniziando modifica");
 
         UUID idCliente = UUID.fromString(richiesta.getIdCliente());

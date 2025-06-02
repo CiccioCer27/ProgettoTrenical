@@ -9,80 +9,53 @@ import grpc.TrenicalServiceImpl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import model.Tratta;
-import observer.*;
+import observer.GrpcNotificaDispatcher;
 import persistence.*;
 import service.BancaServiceClient;
 import service.ClientService;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
- * 🔧 TEST CAPIENZA CORRETTO
+ * 🧪 JUnit Test per Controllo Capienza Thread-Safe
  *
- * ✅ CORREZIONI APPLICATE:
- * - Una sola tratta per tutto il test
- * - Controllo rigoroso della capienza
- * - Reset memoria tra test
- * - Verifica atomica dell'overselling
+ * Test professionale che verifica:
+ * - Controllo atomico della capienza
+ * - Prevenzione overselling
+ * - Thread safety in condizioni di concorrenza
+ * - Integrità dei dati
  */
-public class CapienzaTestIsolato{
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class CapienzaTestIsolato {
 
     private static final int TEST_SERVER_PORT = 8200;
     private static final int TEST_BANCA_PORT = 8201;
-    private static final int CAPIENZA_TEST = 10;
-    private static final int NUM_CLIENT = 30;
+    private static final int CAPIENZA_TEST = 5; // Ridotta per test più veloci
+    private static final int NUM_CLIENT_CONCORRENTI = 15;
 
     // Componenti sistema
     private static Server serverTest;
     private static Server bancaTest;
     private static MemoriaBiglietti memoriaBiglietti;
     private static MemoriaTratte memoriaTratte;
+    private static MemoriaClientiFedeli memoriaClienti;
 
-    // ✅ UNA SOLA TRATTA per tutto il test
-    private static TrattaDTO trattaUnica;
-    private static UUID idTrattaUnica;
+    // Tratta di test
+    private static TrattaDTO trattaTest;
+    private static UUID idTrattaTest;
 
-    // Statistiche
-    private static final AtomicInteger successi = new AtomicInteger(0);
-    private static final AtomicInteger fallimenti = new AtomicInteger(0);
-
-    public static void main(String[] args) {
-        System.out.println("🔧 ===== TEST CAPIENZA CORRETTO =====");
-        System.out.println("🎯 FIX: Una sola tratta, controllo rigoroso");
-        System.out.println("📊 Configurazione:");
-        System.out.println("   🚂 Capienza treno: " + CAPIENZA_TEST);
-        System.out.println("   👥 Client test: " + NUM_CLIENT);
-
-        try {
-            // 1️⃣ Setup sistema
-            setupSistema();
-
-            // 2️⃣ Test sequenziale su UNA tratta
-            testSequenzialeCorretto();
-
-            // 3️⃣ Reset e test concorrenza su STESSA tratta
-            resetSistemaPerConcorrenza();
-            testConcorrenzaCorretto();
-
-            // 4️⃣ Verifica finale rigorosa
-            verificaIntegritaRigorosa();
-
-        } catch (Exception e) {
-            System.err.println("❌ Errore durante test: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            cleanup();
-        }
-    }
-
-    /**
-     * 🚀 Setup con UNA SOLA tratta
-     */
-    private static void setupSistema() throws Exception {
-        System.out.println("\n🚀 Setup sistema corretto...");
+    @BeforeAll
+    static void setupSistema() throws Exception {
+        System.out.println("🚀 Setup sistema test JUnit...");
 
         // Server Banca
         bancaTest = ServerBuilder.forPort(TEST_BANCA_PORT)
@@ -90,27 +63,23 @@ public class CapienzaTestIsolato{
                 .build()
                 .start();
 
-        // Componenti memoria
+        // ✅ Componenti memoria thread-safe (senza EventDispatcher problematico)
         memoriaBiglietti = new MemoriaBiglietti();
-        MemoriaClientiFedeli memoriaClienti = new MemoriaClientiFedeli();
+        memoriaClienti = new MemoriaClientiFedeli();
         memoriaTratte = new MemoriaTratte();
         MemoriaPromozioni memoriaPromozioni = new MemoriaPromozioni();
 
-        // ✅ Crea UNA SOLA tratta che useremo per tutto
-        creaUnicaTratta();
+        // Crea tratta test
+        setupTrattaTest();
 
-        // Event system
-        EventDispatcher dispatcher = new EventDispatcher();
-        GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
-
-        dispatcher.registra(new MemoriaBigliettiListener(memoriaBiglietti, memoriaTratte));
-        dispatcher.registra(new MemoriaClientiFedeliListener(memoriaClienti));
-
+        // ✅ Handler SENZA EventDispatcher (architettura refactored)
         BancaServiceClient bancaClient = new BancaServiceClient("localhost", TEST_BANCA_PORT);
         ServerRequestHandler handler = new ServerRequestHandler(
                 memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient
         );
 
+        // Solo notifiche gRPC (no eventi persistenza)
+        GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
         TrenicalServiceImpl trenicalService = new TrenicalServiceImpl(
                 notificaDispatcher, handler, memoriaPromozioni
         );
@@ -121,19 +90,49 @@ public class CapienzaTestIsolato{
                 .build()
                 .start();
 
-        Thread.sleep(2000);
-        System.out.println("✅ Sistema pronto con tratta unica");
+        Thread.sleep(1000); // Attendi startup
+        System.out.println("✅ Sistema test ready");
     }
 
-    /**
-     * 🚂 Crea UNA SOLA tratta per tutto il test
-     */
-    private static void creaUnicaTratta() {
-        // ✅ ID fisso per poter identificare sempre la stessa tratta
-        idTrattaUnica = UUID.fromString("12345678-1234-1234-1234-123456789abc");
+    @BeforeEach
+    void resetTrattaTest() {
+        System.out.println("🔄 Reset tratta test...");
+
+        // Rimuovi tutti i biglietti per la tratta test
+        List<model.Biglietto> biglietti = new ArrayList<>(memoriaBiglietti.getTuttiIBiglietti());
+        biglietti.stream()
+                .filter(b -> b.getIdTratta().equals(idTrattaTest))
+                .forEach(b -> memoriaBiglietti.rimuoviBiglietto(b.getId()));
+
+        // Verifica reset
+        long bigliettiRimasti = memoriaBiglietti.getTuttiIBiglietti().stream()
+                .filter(b -> b.getIdTratta().equals(idTrattaTest))
+                .count();
+
+        assertEquals(0, bigliettiRimasti, "Reset biglietti tratta test fallito");
+    }
+
+    @AfterAll
+    static void cleanup() throws Exception {
+        System.out.println("🧹 Cleanup sistema test...");
+
+        if (serverTest != null) {
+            serverTest.shutdown();
+            serverTest.awaitTermination(3, TimeUnit.SECONDS);
+        }
+        if (bancaTest != null) {
+            bancaTest.shutdown();
+            bancaTest.awaitTermination(3, TimeUnit.SECONDS);
+        }
+
+        System.out.println("✅ Cleanup completato");
+    }
+
+    private static void setupTrattaTest() {
+        idTrattaTest = UUID.randomUUID();
 
         model.Treno treno = new model.Treno.Builder()
-                .numero(9999)
+                .numero(999)
                 .tipologia("TestTreno")
                 .capienzaTotale(CAPIENZA_TEST)
                 .wifiDisponibile(true)
@@ -141,7 +140,7 @@ public class CapienzaTestIsolato{
                 .ariaCondizionata(true)
                 .serviziRistorazione("Test")
                 .accessibileDisabili(true)
-                .nomeCommerciale("TrenoTestUnico")
+                .nomeCommerciale("TrenoTest")
                 .build();
 
         Map<enums.ClasseServizio, model.Prezzo> prezzi = new HashMap<>();
@@ -150,236 +149,224 @@ public class CapienzaTestIsolato{
         }
 
         Tratta trattaModel = new Tratta(
-                idTrattaUnica, // ✅ ID fisso
-                "TestStart",
-                "TestEnd",
+                idTrattaTest,
+                "TestPartenza",
+                "TestArrivo",
                 LocalDate.now().plusDays(1),
-                java.time.LocalTime.of(14, 30),
+                java.time.LocalTime.of(10, 0),
                 1,
                 treno,
                 prezzi
         );
 
         memoriaTratte.aggiungiTratta(trattaModel);
-        trattaUnica = Assembler.AssemblerTratta.toDTO(trattaModel);
+        trattaTest = Assembler.AssemblerTratta.toDTO(trattaModel);
 
-        System.out.println("🚂 Tratta UNICA creata:");
-        System.out.println("   ID FISSO: " + idTrattaUnica);
-        System.out.println("   Capienza: " + CAPIENZA_TEST + " posti");
+        System.out.println("🚂 Tratta test creata: capienza " + CAPIENZA_TEST);
     }
 
-    /**
-     * 🧪 Test sequenziale corretto
-     */
-    private static void testSequenzialeCorretto() throws Exception {
-        System.out.println("\n🧪 TEST 1: Sequenziale su TRATTA UNICA");
+    @Test
+    @Order(1)
+    @DisplayName("🧪 Test Sequenziale - Verifica Capienza Esatta")
+    void testSequenzialeCapienza() throws Exception {
+        System.out.println("\n🧪 TEST SEQUENZIALE: Verifica capienza esatta");
 
-        ClientService client = new ClientService("localhost", TEST_SERVER_PORT);
-        client.attivaCliente("TestSeq", "User", "seq@test.com", 30, "Test", "3331234567");
-
+        ClientService client = creaClientTest("SeqTest", "seq@test.com");
         int acquistiRiusciti = 0;
 
-        // Prova solo fino alla capienza + 2 per verificare rifiuto
+        // Prova fino alla capienza + 2 per verificare rifiuto
         for (int i = 0; i < CAPIENZA_TEST + 2; i++) {
-            RichiestaDTO acquisto = new RichiestaDTO.Builder()
-                    .tipo("ACQUISTA")
-                    .idCliente(client.getCliente().getId().toString())
-                    .tratta(trattaUnica) // ✅ Sempre la stessa tratta
-                    .classeServizio(ClasseServizio.BASE)
-                    .tipoPrezzo(TipoPrezzo.INTERO)
-                    .build();
-
-            RispostaDTO risposta = client.inviaRichiesta(acquisto);
+            RispostaDTO risposta = tentaAcquisto(client);
 
             if (risposta.getEsito().equals("OK")) {
                 acquistiRiusciti++;
                 System.out.println("   ✅ Posto " + acquistiRiusciti + "/" + CAPIENZA_TEST);
             } else {
-                System.out.println("   ❌ Rifiutato dopo " + acquistiRiusciti + " posti: " + risposta.getMessaggio());
+                System.out.println("   ❌ Rifiutato: " + risposta.getMessaggio());
                 break; // Stop al primo rifiuto
             }
-
-            Thread.sleep(50);
         }
 
-        // ✅ Verifica immediata per tratta specifica
-        verificaCapienzaTrattaSpecifica("TEST SEQUENZIALE", acquistiRiusciti);
+        // ✅ Assertions JUnit
+        assertEquals(CAPIENZA_TEST, acquistiRiusciti,
+                "Dovrebbe vendere esattamente " + CAPIENZA_TEST + " biglietti");
+
+        long bigliettiVenduti = contaBigliettiTrattaTest();
+        assertEquals(CAPIENZA_TEST, bigliettiVenduti,
+                "Biglietti persistiti devono essere esattamente " + CAPIENZA_TEST);
+
+        assertFalse(bigliettiVenduti > CAPIENZA_TEST,
+                "OVERSELLING rilevato!");
     }
 
-    /**
-     * 🔄 Reset sistema per test concorrenza
-     */
-    private static void resetSistemaPerConcorrenza() {
-        System.out.println("\n🔄 RESET per test concorrenza...");
+    @Test
+    @Order(2)
+    @DisplayName("🏎️ Test Concorrenza - Prevenzione Overselling")
+    @Execution(ExecutionMode.SAME_THREAD)
+    void testConcorrenzaOverselling() throws Exception {
+        System.out.println("\n🏎️ TEST CONCORRENZA: Prevenzione overselling");
 
-        // ✅ Rimuovi TUTTI i biglietti della tratta test
-        List<model.Biglietto> biglietti = memoriaBiglietti.getTuttiIBiglietti();
-        for (model.Biglietto b : biglietti) {
-            if (b.getIdTratta().equals(idTrattaUnica)) {
-                memoriaBiglietti.rimuoviBiglietto(b.getId());
-            }
-        }
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_CLIENT_CONCORRENTI);
+        CountDownLatch latch = new CountDownLatch(NUM_CLIENT_CONCORRENTI);
 
-        // Reset contatori
-        successi.set(0);
-        fallimenti.set(0);
-
-        // Verifica reset
-        int bigliettiRimasti = (int) memoriaBiglietti.getTuttiIBiglietti().stream()
-                .filter(b -> b.getIdTratta().equals(idTrattaUnica))
-                .count();
-
-        System.out.println("✅ Reset completato - Biglietti tratta test: " + bigliettiRimasti);
-    }
-
-    /**
-     * 🏎️ Test concorrenza corretto
-     */
-    private static void testConcorrenzaCorretto() throws Exception {
-        System.out.println("\n🏎️ TEST 2: Concorrenza su TRATTA UNICA");
-
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_CLIENT);
-        CountDownLatch latch = new CountDownLatch(NUM_CLIENT);
+        AtomicInteger successi = new AtomicInteger(0);
+        AtomicInteger fallimenti = new AtomicInteger(0);
 
         long startTime = System.currentTimeMillis();
 
-        // ✅ Tutti i client provano sulla STESSA tratta
-        for (int i = 0; i < NUM_CLIENT; i++) {
+        // Lancia richieste concorrenti
+        for (int i = 0; i < NUM_CLIENT_CONCORRENTI; i++) {
             final int clientId = i;
             executor.submit(() -> {
                 try {
-                    tentaAcquistoSuTrattaUnica(clientId);
+                    if (tentaAcquistoConcorrente(clientId)) {
+                        successi.incrementAndGet();
+                    } else {
+                        fallimenti.incrementAndGet();
+                    }
                 } finally {
                     latch.countDown();
                 }
             });
         }
 
-        latch.await(30, TimeUnit.SECONDS);
+        boolean completato = latch.await(15, TimeUnit.SECONDS);
         long endTime = System.currentTimeMillis();
         executor.shutdown();
 
-        System.out.println("\n📊 RISULTATI TEST CONCORRENZA CORRETTO:");
+        // ✅ Risultati
+        System.out.println("📊 RISULTATI CONCORRENZA:");
         System.out.println("   ⏱️ Tempo: " + (endTime - startTime) + "ms");
         System.out.println("   ✅ Successi: " + successi.get());
         System.out.println("   ❌ Fallimenti: " + fallimenti.get());
 
-        // ✅ Verifica immediata capienza tratta unica
-        verificaCapienzaTrattaSpecifica("TEST CONCORRENZA", successi.get());
+        // ✅ Assertions critiche JUnit
+        assertTrue(completato, "Test non completato in tempo utile");
+
+        long bigliettiFinali = contaBigliettiTrattaTest();
+        System.out.println("   🎫 Biglietti finali: " + bigliettiFinali);
+
+        // ASSERTION PRINCIPALE: NO OVERSELLING
+        assertTrue(bigliettiFinali <= CAPIENZA_TEST,
+                "OVERSELLING CRITICO: " + bigliettiFinali + " > " + CAPIENZA_TEST);
+
+        assertEquals(successi.get(), bigliettiFinali,
+                "Discrepanza tra successi riportati e biglietti persistiti");
+
+        assertTrue(successi.get() <= CAPIENZA_TEST,
+                "Troppi successi riportati");
+
+        assertTrue(fallimenti.get() >= (NUM_CLIENT_CONCORRENTI - CAPIENZA_TEST),
+                "Troppi pochi fallimenti - sistema non sta rifiutando correttamente");
     }
 
-    /**
-     * 👤 Client che prova su tratta unica
-     */
-    private static void tentaAcquistoSuTrattaUnica(int clientId) {
-        try {
-            ClientService client = new ClientService("localhost", TEST_SERVER_PORT);
-            client.attivaCliente("ConcUser" + clientId, "Test",
-                    "conc" + clientId + "@test.com", 25, "Test", "333" + clientId);
+    @Test
+    @Order(3)
+    @DisplayName("🔍 Test Integrità Dati")
+    void testIntegritaDati() {
+        System.out.println("\n🔍 TEST INTEGRITÀ: Verifica consistenza dati");
 
-            RichiestaDTO acquisto = new RichiestaDTO.Builder()
-                    .tipo("ACQUISTA")
-                    .idCliente(client.getCliente().getId().toString())
-                    .tratta(trattaUnica) // ✅ Sempre la stessa tratta
-                    .classeServizio(ClasseServizio.BASE)
-                    .tipoPrezzo(TipoPrezzo.INTERO)
-                    .build();
-
-            RispostaDTO risposta = client.inviaRichiesta(acquisto);
-
-            if (risposta.getEsito().equals("OK")) {
-                successi.incrementAndGet();
-            } else {
-                fallimenti.incrementAndGet();
-                if (clientId < 3) {
-                    System.out.println("   ❌ Client " + clientId + ": " + risposta.getMessaggio());
-                }
-            }
-
-        } catch (Exception e) {
-            fallimenti.incrementAndGet();
-        }
-    }
-
-    /**
-     * 🔍 Verifica capienza per la tratta specifica
-     */
-    private static void verificaCapienzaTrattaSpecifica(String nomeTest, int successiAttesi) {
-        int bigliettiTrattaUnica = (int) memoriaBiglietti.getTuttiIBiglietti().stream()
-                .filter(b -> b.getIdTratta().equals(idTrattaUnica))
-                .count();
-
-        System.out.println("\n🔍 VERIFICA " + nomeTest + ":");
-        System.out.println("   🎫 Biglietti venduti per tratta unica: " + bigliettiTrattaUnica);
-        System.out.println("   🚂 Capienza massima: " + CAPIENZA_TEST);
-        System.out.println("   🎯 Overselling: " + (bigliettiTrattaUnica > CAPIENZA_TEST ? "🚨 SÌ" : "✅ NO"));
-
-        if (bigliettiTrattaUnica > CAPIENZA_TEST) {
-            System.out.println("   ⚠️ PROBLEMA: " + (bigliettiTrattaUnica - CAPIENZA_TEST) + " biglietti in eccesso!");
-        }
-    }
-
-    /**
-     * 🔍 Verifica integrità finale rigorosa
-     */
-    private static void verificaIntegritaRigorosa() {
-        System.out.println("\n🔍 VERIFICA INTEGRITÀ FINALE RIGOROSA");
-
+        // Verifica che non ci siano biglietti orfani
         List<model.Biglietto> tuttiBiglietti = memoriaBiglietti.getTuttiIBiglietti();
 
-        // Raggruppa per tratta
-        Map<UUID, List<model.Biglietto>> bigliettiPerTratta = tuttiBiglietti.stream()
-                .collect(java.util.stream.Collectors.groupingBy(b -> b.getIdTratta()));
+        for (model.Biglietto biglietto : tuttiBiglietti) {
+            assertNotNull(biglietto.getId(), "Biglietto con ID null");
+            assertNotNull(biglietto.getIdCliente(), "Biglietto con cliente null");
+            assertNotNull(biglietto.getIdTratta(), "Biglietto con tratta null");
+            assertTrue(biglietto.getPrezzoPagato() > 0, "Prezzo non valido");
+        }
 
-        System.out.println("📊 ANALISI PER TRATTA:");
-        bigliettiPerTratta.forEach((idTratta, biglietti) -> {
-            String trattaInfo = idTratta.equals(idTrattaUnica) ?
-                    "🎯 TRATTA TEST (quella che dovevamo testare)" :
-                    "❓ TRATTA SCONOSCIUTA (non dovrebbe esistere!)";
+        // Verifica capienza per ogni tratta
+        Map<UUID, Long> bigliettiPerTratta = tuttiBiglietti.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        model.Biglietto::getIdTratta,
+                        java.util.stream.Collectors.counting()
+                ));
 
-            System.out.println("   " + idTratta.toString().substring(0, 8) + ": " +
-                    biglietti.size() + " biglietti - " + trattaInfo);
+        bigliettiPerTratta.forEach((idTratta, count) -> {
+            if (idTratta.equals(idTrattaTest)) {
+                assertTrue(count <= CAPIENZA_TEST,
+                        "Overselling su tratta test: " + count + " > " + CAPIENZA_TEST);
+            }
         });
 
-        // ✅ Controllo specifico tratta test
-        int bigliettiTrattaTest = bigliettiPerTratta.getOrDefault(idTrattaUnica, List.of()).size();
-        boolean overselling = bigliettiTrattaTest > CAPIENZA_TEST;
-        int tratteInaspettate = bigliettiPerTratta.size() - (bigliettiPerTratta.containsKey(idTrattaUnica) ? 1 : 0);
+        System.out.println("✅ Integrità dati verificata");
+    }
 
-        System.out.println("\n🏆 VERDETTO FINALE RIGOROSO:");
-        System.out.println("   🎫 Biglietti tratta test: " + bigliettiTrattaTest + "/" + CAPIENZA_TEST);
-        System.out.println("   🚨 Overselling: " + (overselling ? "SÌ" : "NO"));
-        System.out.println("   ❓ Tratte inaspettate: " + tratteInaspettate);
+    @Test
+    @Order(4)
+    @DisplayName("⚡ Test Performance Controllo Atomico")
+    void testPerformanceControlloAtomico() throws Exception {
+        System.out.println("\n⚡ TEST PERFORMANCE: Controllo atomico");
 
-        if (!overselling && tratteInaspettate == 0) {
-            System.out.println("   🎉 SUCCESSO COMPLETO: Controllo capienza perfetto!");
-            System.out.println("   ✨ Sistema thread-safe e affidabile");
-        } else if (overselling) {
-            System.out.println("   ⚠️ FALLIMENTO: Overselling rilevato!");
-            System.out.println("   🔧 Problema nel controllo atomico della capienza");
-        } else if (tratteInaspettate > 0) {
-            System.out.println("   ⚠️ PROBLEMA: Il test ha creato tratte multiple!");
-            System.out.println("   🔧 Problema nella logica del test o nel sistema");
+        int numTentativi = 50;
+        ExecutorService executor = Executors.newFixedThreadPool(numTentativi);
+        CountDownLatch latch = new CountDownLatch(numTentativi);
+
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < numTentativi; i++) {
+            final int clientId = i;
+            executor.submit(() -> {
+                try {
+                    tentaAcquistoConcorrente(clientId);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        boolean completato = latch.await(10, TimeUnit.SECONDS);
+        long endTime = System.currentTimeMillis();
+        executor.shutdown();
+
+        long durata = endTime - startTime;
+        long bigliettiFinali = contaBigliettiTrattaTest();
+
+        System.out.println("📊 PERFORMANCE:");
+        System.out.println("   ⏱️ Durata: " + durata + "ms");
+        System.out.println("   🎫 Biglietti: " + bigliettiFinali);
+        System.out.println("   📈 Throughput: " + (numTentativi * 1000.0 / durata) + " req/sec");
+
+        // Assertions performance
+        assertTrue(completato, "Test performance non completato in tempo");
+        assertTrue(durata < 8000, "Performance troppo lenta: " + durata + "ms");
+        assertTrue(bigliettiFinali <= CAPIENZA_TEST, "Overselling in test performance");
+    }
+
+    // ═══ UTILITY METHODS ═══
+
+    private ClientService creaClientTest(String nome, String email) throws Exception {
+        ClientService client = new ClientService("localhost", TEST_SERVER_PORT);
+        client.attivaCliente(nome, "Test", email, 30, "TestCity", "3331234567");
+        return client;
+    }
+
+    private RispostaDTO tentaAcquisto(ClientService client) {
+        RichiestaDTO acquisto = new RichiestaDTO.Builder()
+                .tipo("ACQUISTA")
+                .idCliente(client.getCliente().getId().toString())
+                .tratta(trattaTest)
+                .classeServizio(ClasseServizio.BASE)
+                .tipoPrezzo(TipoPrezzo.INTERO)
+                .build();
+
+        return client.inviaRichiesta(acquisto);
+    }
+
+    private boolean tentaAcquistoConcorrente(int clientId) {
+        try {
+            ClientService client = creaClientTest("ConcUser" + clientId, "conc" + clientId + "@test.com");
+            RispostaDTO risposta = tentaAcquisto(client);
+            return risposta.getEsito().equals("OK");
+        } catch (Exception e) {
+            return false;
         }
     }
 
-    /**
-     * 🧹 Cleanup
-     */
-    private static void cleanup() {
-        System.out.println("\n🧹 Cleanup...");
-        try {
-            if (serverTest != null) {
-                serverTest.shutdown();
-                serverTest.awaitTermination(3, TimeUnit.SECONDS);
-            }
-            if (bancaTest != null) {
-                bancaTest.shutdown();
-                bancaTest.awaitTermination(3, TimeUnit.SECONDS);
-            }
-            System.out.println("✅ Cleanup completato");
-        } catch (Exception e) {
-            System.err.println("⚠️ Errore cleanup: " + e.getMessage());
-        }
+    private long contaBigliettiTrattaTest() {
+        return memoriaBiglietti.getTuttiIBiglietti().stream()
+                .filter(b -> b.getIdTratta().equals(idTrattaTest))
+                .count();
     }
 }

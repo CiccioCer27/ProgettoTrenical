@@ -12,7 +12,7 @@ public class ComandoErrore implements ServerCommand {
     }
 
     @Override
-    public RispostaDTO esegui(RichiestaDTO richiesta) {
+    public RispostaDTO esegui() {
         return new RispostaDTO("KO", messaggio, null);
     }
 }

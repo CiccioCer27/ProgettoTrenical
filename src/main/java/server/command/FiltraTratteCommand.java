@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+/**
+ * Command Pattern Implementation per filtraggio tratte
+ * Encapsula la logica di ricerca e filtraggio come comando riutilizzabile
+ */
 public class FiltraTratteCommand implements ServerCommand {
 
     private final RichiestaDTO richiesta;
@@ -24,20 +28,17 @@ public class FiltraTratteCommand implements ServerCommand {
     }
 
     @Override
-    public RispostaDTO esegui(RichiestaDTO richiestaPassata) {
-        // ✅ Usa la richiesta passata invece di quella del costruttore
-        RichiestaDTO req = richiestaPassata != null ? richiestaPassata : richiesta;
-
+    public RispostaDTO esegui() {  // ✅ FIXED: Nessun parametro confusing
         List<Tratta> tutte = memoria.getTutteTratte();
 
         // ✅ Gestisci il caso del messaggio extra (formato: "data;partenza;arrivo;fascia")
-        LocalDate dataFiltro = req.getData();
-        String partenzaFiltro = req.getPartenza();
-        String arrivoFiltro = req.getArrivo();
-        String fasciaFiltro = req.getFasciaOraria();
+        LocalDate dataFiltro = richiesta.getData();
+        String partenzaFiltro = richiesta.getPartenza();
+        String arrivoFiltro = richiesta.getArrivo();
+        String fasciaFiltro = richiesta.getFasciaOraria();
 
-        if (req.getMessaggioExtra() != null && !req.getMessaggioExtra().isEmpty()) {
-            String[] parti = req.getMessaggioExtra().split(";");
+        if (richiesta.getMessaggioExtra() != null && !richiesta.getMessaggioExtra().isEmpty()) {
+            String[] parti = richiesta.getMessaggioExtra().split(";");
             if (parti.length >= 4) {
                 try {
                     if (!parti[0].trim().isEmpty()) dataFiltro = LocalDate.parse(parti[0].trim());
@@ -60,8 +61,8 @@ public class FiltraTratteCommand implements ServerCommand {
                 .filter(t -> dataFinale == null || t.getData().equals(dataFinale))
                 .filter(t -> partenzaFinale == null || t.getStazionePartenza().equalsIgnoreCase(partenzaFinale))
                 .filter(t -> arrivoFinale == null || t.getStazioneArrivo().equalsIgnoreCase(arrivoFinale))
-                .filter(t -> req.getTipoTreno() == null || t.getTreno().getTipologia().equalsIgnoreCase(req.getTipoTreno()))
-                .filter(t -> req.getClasseServizio() == null || t.getPrezzi().containsKey(req.getClasseServizio()))
+                .filter(t -> richiesta.getTipoTreno() == null || t.getTreno().getTipologia().equalsIgnoreCase(richiesta.getTipoTreno()))
+                .filter(t -> richiesta.getClasseServizio() == null || t.getPrezzi().containsKey(richiesta.getClasseServizio()))
                 .filter(t -> {
                     if (fasciaFinale == null) return true;
                     LocalTime ora = t.getOra();
