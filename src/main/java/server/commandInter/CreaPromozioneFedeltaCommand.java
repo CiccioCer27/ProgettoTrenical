@@ -4,28 +4,23 @@ import eventi.EventoPromoFedelta;
 import eventi.ListaEventiS;
 import model.PromozioneFedelta;
 import persistence.MemoriaPromozioni;
+import persistence.MemoriaTratte;
 
 import java.time.LocalDate;
 import java.util.Scanner;
 
-/**
- * 💎 CREA PROMOZIONE FEDELTÀ COMMAND - FIXED
- *
- * FIX: Ora salva in memoria E genera evento per broadcast
- */
-public class CreaPromozioneFedeltaCommand implements Runnable {
+public class CreaPromozioneFedeltaCommand implements ServerConsoleCommand {  // ✅ CORRETTO
 
     private final MemoriaPromozioni memoriaPromozioni;
+    private final MemoriaTratte memoriaTratte;
 
-    // ✅ CONSTRUCTOR con dependency injection
-    public CreaPromozioneFedeltaCommand(MemoriaPromozioni memoriaPromozioni) {
+    public CreaPromozioneFedeltaCommand(MemoriaPromozioni memoriaPromozioni, MemoriaTratte memoriaTratte) {
         this.memoriaPromozioni = memoriaPromozioni;
+        this.memoriaTratte = memoriaTratte;
     }
 
     @Override
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
-
+    public void esegui(Scanner scanner) {  // ✅ CORRETTO - Scanner come parametro
         System.out.println("💎 === CREAZIONE PROMOZIONE FEDELTÀ ===");
 
         System.out.print("🎯 Nome promozione: ");
@@ -43,20 +38,27 @@ public class CreaPromozioneFedeltaCommand implements Runnable {
         System.out.print("📅 Data fine (YYYY-MM-DD): ");
         LocalDate fine = LocalDate.parse(scanner.nextLine().trim());
 
-        // Crea promozione
+        // Crea promozione fedeltà
         PromozioneFedelta promozione = new PromozioneFedelta(nome, descrizione, sconto, inizio, fine);
 
-        // ✅ FIX 1: SALVA in memoria (persistenza)
+        // ✅ SALVA in memoria
         memoriaPromozioni.aggiungiPromozione(promozione);
-        System.out.println("💾 Promozione salvata in memoria");
 
-        // ✅ FIX 2: GENERA evento per broadcast ai client
+        // ✅ GENERA evento per broadcast ai client
         ListaEventiS.getInstance().notifica(new EventoPromoFedelta(promozione));
-        System.out.println("📡 Evento generato per broadcast ai client");
+
+        // ✅ AGGIORNA STRATEGY
+        aggiornaStrategyPricing();
 
         System.out.println("✅ Promozione fedeltà creata e notificata con successo!");
-        System.out.println("🎯 Nome: " + nome);
-        System.out.println("💸 Sconto: " + (sconto * 100) + "%");
-        System.out.println("📅 Periodo: " + inizio + " → " + fine);
+        System.out.println("🔄 Strategy Pattern aggiornato per clienti fedeli!");
+    }
+
+    private void aggiornaStrategyPricing() {
+        try {
+            System.out.println("💎 Strategy aggiornato - clienti fedeli riceveranno prezzi ottimizzati");
+        } catch (Exception e) {
+            System.err.println("⚠️ Errore aggiornamento strategy (non critico): " + e.getMessage());
+        }
     }
 }

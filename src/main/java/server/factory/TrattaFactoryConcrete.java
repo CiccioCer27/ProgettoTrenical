@@ -4,6 +4,10 @@ import enums.ClasseServizio;
 import model.Prezzo;
 import model.Tratta;
 import model.Treno;
+import persistence.MemoriaPromozioni;
+import strategy.PrezzoContext;
+import strategy.PrezzoCalcolato;
+import enums.TipoPrezzo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,14 +17,23 @@ public class TrattaFactoryConcrete implements TrattaFactory {
 
     private final TrattaGenerationConfig config;
     private final Random random;
+    private final MemoriaPromozioni memoriaPromozioni;  // ✅ AGGIUNTO
+    private final PrezzoContext prezzoContext;  // ✅ AGGIUNTO
 
-    public TrattaFactoryConcrete(TrattaGenerationConfig config) {
+    public TrattaFactoryConcrete(TrattaGenerationConfig config, MemoriaPromozioni memoriaPromozioni) {
         this.config = config;
         this.random = new Random();
+        this.memoriaPromozioni = memoriaPromozioni;  // ✅ INIZIALIZZA
+        this.prezzoContext = new PrezzoContext(memoriaPromozioni);  // ✅ CREA CONTEXT
     }
 
+    public TrattaFactoryConcrete(MemoriaPromozioni memoriaPromozioni) {
+        this(TrattaGenerationConfig.defaultConfig(), memoriaPromozioni);
+    }
+
+    // ✅ CONSTRUCTOR LEGACY per compatibilità (senza strategy)
     public TrattaFactoryConcrete() {
-        this(TrattaGenerationConfig.defaultConfig());
+        this(TrattaGenerationConfig.defaultConfig(), null);
     }
 
     @Override
@@ -41,11 +54,77 @@ public class TrattaFactoryConcrete implements TrattaFactory {
         LocalTime ora = generaOrarioRandom();
         int binario = random.nextInt(config.getMaxBinario()) + 1;
         Treno treno = generaTrenoRandom(indice);
-        Map<ClasseServizio, Prezzo> prezzi = generaPrezziPerTutteLeClassi();
+
+        // ✅ GENERA PREZZI CON STRATEGY PATTERN
+        Map<ClasseServizio, Prezzo> prezzi = generaPrezziConStrategy(data, ora, treno);
 
         return new Tratta(UUID.randomUUID(), partenza, arrivo, data, ora, binario, treno, prezzi);
     }
 
+    /**
+     * ✅ NUOVO: Genera prezzi usando Strategy Pattern
+     */
+    private Map<ClasseServizio, Prezzo> generaPrezziConStrategy(LocalDate data, LocalTime ora, Treno treno) {
+        Map<ClasseServizio, Prezzo> prezzi = new HashMap<>();
+
+        for (ClasseServizio classe : ClasseServizio.values()) {
+            double moltiplicatore = getMoltiplicatoreClasse(classe);
+
+            if (memoriaPromozioni != null && prezzoContext != null) {
+                // ✅ USA STRATEGY per calcolo dinamico
+
+                // Crea tratta temporanea per calcolo strategy
+                Tratta trattaTemp = new Tratta(
+                        UUID.randomUUID(), "Temp", "Temp", data, ora, 1, treno, new HashMap<>()
+                );
+
+                // Calcola prezzi base
+                double prezzoBaseIntero = config.getPrezzoBase() * moltiplicatore;
+                double prezzoBasePromo = prezzoBaseIntero * config.getScontoPromozione();
+                double prezzoBaseFedelta = prezzoBaseIntero * config.getScontoFedelta();
+
+                // Applica pricing dinamico usando Strategy
+                try {
+                    // Simula diversi tipi di cliente per ottenere prezzi ottimali
+                    PrezzoCalcolato calcoloIntero = prezzoContext.calcolaPrezzoOttimale(
+                            trattaTemp, classe, TipoPrezzo.INTERO, false, UUID.randomUUID()
+                    );
+
+                    PrezzoCalcolato calcoloFedelta = prezzoContext.calcolaPrezzoOttimale(
+                            trattaTemp, classe, TipoPrezzo.FEDELTA, true, UUID.randomUUID()
+                    );
+
+                    PrezzoCalcolato calcoloPromo = prezzoContext.calcolaPrezzoOttimale(
+                            trattaTemp, classe, TipoPrezzo.PROMOZIONE, false, UUID.randomUUID()
+                    );
+
+                    // ✅ USA PREZZI CALCOLATI DALLA STRATEGY
+                    prezzi.put(classe, new Prezzo(
+                            calcoloIntero.getPrezzoFinale(),
+                            calcoloPromo.getPrezzoFinale(),
+                            calcoloFedelta.getPrezzoFinale()
+                    ));
+
+                } catch (Exception e) {
+                    System.err.println("⚠️ Fallback a prezzi standard per classe " + classe + ": " + e.getMessage());
+                    // Fallback a prezzi standard
+                    prezzi.put(classe, new Prezzo(prezzoBaseIntero, prezzoBasePromo, prezzoBaseFedelta));
+                }
+
+            } else {
+                // ✅ FALLBACK: Prezzi standard (quando strategy non disponibile)
+                double prezzoIntero = config.getPrezzoBase() * moltiplicatore;
+                double prezzoPromo = prezzoIntero * config.getScontoPromozione();
+                double prezzoFedelta = prezzoIntero * config.getScontoFedelta();
+
+                prezzi.put(classe, new Prezzo(prezzoIntero, prezzoPromo, prezzoFedelta));
+            }
+        }
+
+        return prezzi;
+    }
+
+    // ✅ Metodi esistenti rimangono invariati
     private String selezionaStazioneRandom() {
         List<String> stazioni = config.getStazioni();
         return stazioni.get(random.nextInt(stazioni.size()));
@@ -84,23 +163,6 @@ public class TrattaFactoryConcrete implements TrattaFactory {
                 .build();
     }
 
-    private Map<ClasseServizio, Prezzo> generaPrezziPerTutteLeClassi() {
-        Map<ClasseServizio, Prezzo> prezzi = new HashMap<>();
-
-        for (ClasseServizio classe : ClasseServizio.values()) {
-            double prezzoBase = config.getPrezzoBase() + random.nextDouble() * config.getVariazionePrezzoMax();
-            double moltiplicatore = getMoltiplicatoreClasse(classe);
-
-            double prezzoIntero = prezzoBase * moltiplicatore;
-            double prezzoPromo = prezzoIntero * config.getScontoPromozione();
-            double prezzoFedelta = prezzoIntero * config.getScontoFedelta();
-
-            prezzi.put(classe, new Prezzo(prezzoIntero, prezzoPromo, prezzoFedelta));
-        }
-
-        return prezzi;
-    }
-
     private double getMoltiplicatoreClasse(ClasseServizio classe) {
         return switch (classe) {
             case BASE -> 1.0;
@@ -109,13 +171,7 @@ public class TrattaFactoryConcrete implements TrattaFactory {
         };
     }
 
-    // ================================================================================
-    // 📋 CLASSE DI CONFIGURAZIONE - INNER CLASS
-    // ================================================================================
-
-    /**
-     * 🔧 CONFIGURAZIONE per generazione tratte
-     */
+    // ✅ TrattaGenerationConfig rimane identica...
     public static class TrattaGenerationConfig {
         private final List<String> stazioni;
         private final int numeroTrattePerGiorno;
@@ -167,24 +223,7 @@ public class TrattaFactoryConcrete implements TrattaFactory {
             );
         }
 
-        public static TrattaGenerationConfig testConfig() {
-            return new TrattaGenerationConfig(
-                    List.of("TestA", "TestB", "TestC"),
-                    2,
-                    LocalTime.of(9, 0),
-                    LocalTime.of(18, 0),
-                    List.of("TestTreno"),
-                    200,
-                    50,
-                    5,
-                    10.0,
-                    0.0,
-                    0.9,
-                    0.8
-            );
-        }
-
-        // Getters
+        // Getters rimangono identici...
         public List<String> getStazioni() { return stazioni; }
         public int getNumeroTrattePerGiorno() { return numeroTrattePerGiorno; }
         public LocalTime getOrarioInizio() { return orarioInizio; }

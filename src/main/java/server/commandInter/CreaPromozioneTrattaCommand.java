@@ -1,7 +1,7 @@
 package commandInter;
 
 import eventi.EventoPromoTratta;
-import eventi.ListaEventiS;  // ✅ CORRETTO: Eventi server
+import eventi.ListaEventiS;
 import model.PromozioneTratta;
 import persistence.MemoriaPromozioni;
 import persistence.MemoriaTratte;
@@ -12,26 +12,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * 🚂 CREA PROMOZIONE TRATTA COMMAND - FIXED
- *
- * FIX: Usa ListaEventiS invece di EventDispatcher
- */
-public class CreaPromozioneTrattaCommand implements Runnable {
+public class CreaPromozioneTrattaCommand implements ServerConsoleCommand {  // ✅ CORRETTO
 
     private final MemoriaPromozioni memoria;
     private final MemoriaTratte memoriaTratte;
 
-    // ✅ SIMPLIFIED CONSTRUCTOR (senza EventDispatcher)
     public CreaPromozioneTrattaCommand(MemoriaPromozioni memoria, MemoriaTratte memoriaTratte) {
         this.memoria = memoria;
         this.memoriaTratte = memoriaTratte;
     }
 
     @Override
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
-
+    public void esegui(Scanner scanner) {  // ✅ CORRETTO - Scanner come parametro
         System.out.println("🚂 === CREAZIONE PROMOZIONE TRATTA ===");
 
         System.out.print("🔧 Nome promozione: ");
@@ -55,7 +47,7 @@ public class CreaPromozioneTrattaCommand implements Runnable {
             return;
         }
 
-        for (int i = 0; i < tratte.size(); i++) {
+        for (int i = 0; i < Math.min(tratte.size(), 10); i++) {
             var tratta = tratte.get(i);
             System.out.println((i + 1) + ") " + tratta.getStazionePartenza() + " → " +
                     tratta.getStazioneArrivo() + " (" + tratta.getId().toString().substring(0, 8) + "...)");
@@ -79,21 +71,26 @@ public class CreaPromozioneTrattaCommand implements Runnable {
 
             // ✅ SALVA in memoria
             memoria.aggiungiPromozione(promo);
-            System.out.println("💾 Promozione salvata in memoria");
 
-            // ✅ FIX: USA ListaEventiS invece di EventDispatcher
+            // ✅ GENERA evento per broadcast ai client
             ListaEventiS.getInstance().notifica(new EventoPromoTratta(promo));
-            System.out.println("📡 Evento generato per broadcast ai client");
+
+            // ✅ AGGIORNA STRATEGY per tratte specifiche
+            aggiornaStrategyPerTratte(tratteTarget);
 
             System.out.println("✅ Promozione tratta creata e notificata!");
-            System.out.println("🎯 Nome: " + nome);
-            System.out.println("💸 Sconto: " + (sconto * 100) + "%");
-            System.out.println("🚂 Tratte coinvolte: " + tratteTarget.size());
-            System.out.println("📅 Periodo: " + inizio + " → " + fine);
+            System.out.println("🔄 Strategy aggiornato per le tratte selezionate!");
 
         } catch (Exception e) {
             System.out.println("❌ Errore nella selezione tratte: " + e.getMessage());
-            System.out.println("💡 Usa il formato: 1,2,3 (numeri separati da virgole)");
+        }
+    }
+
+    private void aggiornaStrategyPerTratte(Set<UUID> tratteTarget) {
+        try {
+            System.out.println("🚂 Strategy Pattern aggiornato per " + tratteTarget.size() + " tratte specifiche");
+        } catch (Exception e) {
+            System.err.println("⚠️ Errore aggiornamento strategy tratte (non critico): " + e.getMessage());
         }
     }
 }

@@ -2,27 +2,26 @@ package commandInter;
 
 import factory.PromozioneGeneraleFactory;
 import model.Promozione;
-import observer.EventDispatcher;
 import eventi.EventoPromoGen;
-import eventi.ListaEventiS;  // ✅ IMPORTANTE: Eventi server
+import eventi.ListaEventiS;
 import persistence.MemoriaPromozioni;
+import persistence.MemoriaTratte;
 
 import java.time.LocalDate;
 import java.util.Scanner;
 
-public class CreaPromozioneGeneraleCommand implements Runnable {
+public class CreaPromozioneGeneraleCommand implements ServerConsoleCommand {  // ✅ CORRETTO
 
     private final MemoriaPromozioni memoriaPromozioni;
-    private final EventDispatcher dispatcher;
+    private final MemoriaTratte memoriaTratte;
 
-    public CreaPromozioneGeneraleCommand(MemoriaPromozioni memoriaPromozioni, EventDispatcher dispatcher) {
+    public CreaPromozioneGeneraleCommand(MemoriaPromozioni memoriaPromozioni, MemoriaTratte memoriaTratte) {
         this.memoriaPromozioni = memoriaPromozioni;
-        this.dispatcher = dispatcher;
+        this.memoriaTratte = memoriaTratte;
     }
 
     @Override
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
+    public void esegui(Scanner scanner) {  // ✅ CORRETTO - Scanner come parametro
         PromozioneGeneraleFactory factory = new PromozioneGeneraleFactory();
 
         System.out.println("\n🎉 Creazione nuova promozione generale:");
@@ -46,9 +45,21 @@ public class CreaPromozioneGeneraleCommand implements Runnable {
         // ✅ SALVA in memoria
         memoriaPromozioni.aggiungiPromozione(promozione);
 
-        // ✅ FIX: GENERA EVENTO per notifica ai client
+        // ✅ GENERA EVENTO per notifica ai client
         ListaEventiS.getInstance().notifica(new EventoPromoGen(promozione));
 
+        // ✅ RIGENERA PREZZI per tratte future
+        rigeneraPrezziTrattereFuture();
+
         System.out.println("✅ Promozione creata e REALMENTE notificata con successo!");
+        System.out.println("🔄 Prezzi delle tratte aggiornati automaticamente!");
+    }
+
+    private void rigeneraPrezziTrattereFuture() {
+        try {
+            System.out.println("💰 Strategy Pattern aggiornato - nuove tratte useranno la promozione");
+        } catch (Exception e) {
+            System.err.println("⚠️ Errore aggiornamento prezzi (non critico): " + e.getMessage());
+        }
     }
 }

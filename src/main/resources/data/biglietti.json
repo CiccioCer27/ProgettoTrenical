@@ -1,19 +1,46 @@
 [ {
-  "id" : "c98837d8-f3d3-47a5-bbc0-c27cbc1ebcb7",
-  "idCliente" : "1b8f61ff-214f-42dc-b99c-f0540b2f8053",
-  "idTratta" : "a154caee-e920-48bc-8705-67a85715cd09",
+  "id" : "6e3a4cbd-582c-466e-87d4-11534c3b817c",
+  "idCliente" : "699579b9-4277-4f15-a55d-fc7cd605897b",
+  "idTratta" : "dedb6d55-ef93-450f-82bd-ad37184919d1",
   "classe" : "BASE",
   "conCartaFedelta" : false,
-  "prezzoPagato" : 26.205085540747724,
+  "prezzoPagato" : 666.0,
   "dataAcquisto" : "2025-06-03",
   "tipoAcquisto" : "acquisto"
 }, {
-  "id" : "87529ccc-50db-4260-a262-a336cb4d1826",
-  "idCliente" : "496fdde0-81cb-44af-9c34-061872c2b9bf",
-  "idTratta" : "f533ea60-7957-4d71-b1d6-31e486190b88",
+  "id" : "3790895e-57d8-49cc-84b6-d942bdad03d7",
+  "idCliente" : "d67343cd-8f27-4e54-9085-ddef3d52b422",
+  "idTratta" : "031a3d27-a757-4e76-828d-a9b6e66a9be0",
   "classe" : "BASE",
   "conCartaFedelta" : false,
-  "prezzoPagato" : 29.8389635921245,
+  "prezzoPagato" : 666.0,
   "dataAcquisto" : "2025-06-03",
-  "tipoAcquisto" : "modifica"
+  "tipoAcquisto" : "acquisto"
+}, {
+  "id" : "3be197fa-6949-4f3e-9e69-d0a5a6e91b8d",
+  "idCliente" : "263235c8-1476-49ec-b7ff-a2d6b179d2ec",
+  "idTratta" : "0de6416b-94b2-4788-bc59-824aa3b16ebd",
+  "classe" : "BASE",
+  "conCartaFedelta" : false,
+  "prezzoPagato" : 666.0,
+  "dataAcquisto" : "2025-06-03",
+  "tipoAcquisto" : "acquisto"
+}, {
+  "id" : "aabbf48d-9bc2-4607-ac21-f155c9541ad4",
+  "idCliente" : "8658a4ab-c1fb-4990-91a0-b1a3642a08ae",
+  "idTratta" : "000755bc-1613-4f5c-8b3b-7f15af90a5cd",
+  "classe" : "BASE",
+  "conCartaFedelta" : false,
+  "prezzoPagato" : 666.0,
+  "dataAcquisto" : "2025-06-03",
+  "tipoAcquisto" : "acquisto"
+}, {
+  "id" : "7aac4f58-4b70-4b10-b284-f19cb4be2e38",
+  "idCliente" : "d5f63ba1-1f2d-48f1-9aee-bc6107fa6e31",
+  "idTratta" : "193a52bc-0cc1-4de6-a545-ccfeb805b176",
+  "classe" : "BASE",
+  "conCartaFedelta" : false,
+  "prezzoPagato" : 666.0,
+  "dataAcquisto" : "2025-06-03",
+  "tipoAcquisto" : "acquisto"
 } ]

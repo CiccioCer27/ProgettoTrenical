@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("🔥 Test Infernale - Stress Estremo Sistema TreniCal")
-class TestInfernaleJUnit {
+class TestInfernale{
 
     private static final int SERVER_PORT = 8112;
     private static final int BANCA_PORT = 8113;
