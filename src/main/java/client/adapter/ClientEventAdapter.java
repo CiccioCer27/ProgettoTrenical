@@ -16,10 +16,10 @@ public class ClientEventAdapter {
     /**
      * Processa una risposta del server e genera eventi appropriati
      */
-    public static void processaRisposta(RispostaDTO risposta, String tipoOperazione) {
-        System.out.println("🔍 DEBUG: processaRisposta chiamato");
+    public static synchronized void processaRisposta(RispostaDTO risposta, String tipoOperazione) {
+        System.out.println("🔍 DEBUG ADAPTER (THREAD-SAFE): processaRisposta chiamato");
+        System.out.println("   Thread: " + Thread.currentThread().getName());
         System.out.println("   Tipo operazione: " + tipoOperazione);
-        System.out.println("   Risposta: " + (risposta != null ? risposta.getEsito() : "NULL"));
 
         if (risposta == null) {
             System.out.println("❌ DEBUG: Risposta è null!");
@@ -72,14 +72,14 @@ public class ClientEventAdapter {
         };
 
         if (evento != null) {
-            System.out.println("✅ DEBUG: Evento generato: " + evento.getClass().getSimpleName());
-            System.out.println("🔔 DEBUG: Notificando ListaEventi...");
+            System.out.println("✅ DEBUG ADAPTER: Notifica thread-safe in corso...");
 
-            ListaEventi listaEventi = ListaEventi.getInstance();
-            System.out.println("📋 DEBUG: Numero observers registrati: " + getObserverCount(listaEventi));
+            // ✅ SINCRONIZZAZIONE EXTRA per eventi critici
+            synchronized (ListaEventi.getInstance()) {
+                ListaEventi.getInstance().notifica(evento);
+            }
 
-            listaEventi.notifica(evento);
-            System.out.println("✅ DEBUG: Notifica inviata!");
+            System.out.println("✅ DEBUG ADAPTER: Notifica thread-safe completata!");
         } else {
             System.out.println("❌ DEBUG: Evento è null, non posso notificare");
         }
