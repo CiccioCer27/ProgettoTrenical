@@ -1,1 +1,901 @@
-[]
+[ {
+  "id" : "b07cbcbf-c4d1-45e7-b331-9d3743d33726",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Torino",
+  "data" : "2025-06-04",
+  "ora" : "21:00:00",
+  "binario" : 2,
+  "treno" : {
+    "id" : "880c13a1-f2a2-471b-8646-890dd7b06ded",
+    "numero" : 100,
+    "tipologia" : "Regionale",
+    "capienzaTotale" : 88,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Regionale 100"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 21.565919616982487,
+      "promozione" : 17.25273569358599,
+      "fedelta" : 12.939551770189492
+    },
+    "GOLD" : {
+      "intero" : 26.696089516401596,
+      "promozione" : 21.356871613121278,
+      "fedelta" : 16.017653709840957
+    },
+    "BASE" : {
+      "intero" : 26.459795661718225,
+      "promozione" : 21.167836529374583,
+      "fedelta" : 15.875877397030933
+    }
+  }
+}, {
+  "id" : "3ba33fcd-b1d7-4426-bb76-9ea2bcc1409c",
+  "stazionePartenza" : "Milano",
+  "stazioneArrivo" : "ReggioCalabria",
+  "data" : "2025-06-04",
+  "ora" : "18:00:00",
+  "binario" : 6,
+  "treno" : {
+    "id" : "7896c7ac-9d5d-498d-aaaf-9beba70586c1",
+    "numero" : 101,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 84,
+    "wifiDisponibile" : true,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 101"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 31.000481553655497,
+      "promozione" : 24.8003852429244,
+      "fedelta" : 18.600288932193298
+    },
+    "GOLD" : {
+      "intero" : 26.4002041466609,
+      "promozione" : 21.12016331732872,
+      "fedelta" : 15.84012248799654
+    },
+    "BASE" : {
+      "intero" : 34.214130958019965,
+      "promozione" : 27.371304766415975,
+      "fedelta" : 20.528478574811977
+    }
+  }
+}, {
+  "id" : "99de5a6e-36a5-40d5-9dcd-53d5ec1fd4ca",
+  "stazionePartenza" : "Strongoli",
+  "stazioneArrivo" : "Firenze",
+  "data" : "2025-06-04",
+  "ora" : "18:00:00",
+  "binario" : 2,
+  "treno" : {
+    "id" : "8d714939-2ae7-4a01-97e9-b75d64dbf9b4",
+    "numero" : 102,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 92,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 102"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 48.59646767722725,
+      "promozione" : 38.87717414178181,
+      "fedelta" : 29.15788060633635
+    },
+    "GOLD" : {
+      "intero" : 52.51326246925435,
+      "promozione" : 42.01060997540348,
+      "fedelta" : 31.50795748155261
+    },
+    "BASE" : {
+      "intero" : 29.513751469598134,
+      "promozione" : 23.61100117567851,
+      "fedelta" : 17.70825088175888
+    }
+  }
+}, {
+  "id" : "4e747201-70b3-4f2a-923a-ee9c8c861170",
+  "stazionePartenza" : "Strongoli",
+  "stazioneArrivo" : "Milano",
+  "data" : "2025-06-04",
+  "ora" : "12:00:00",
+  "binario" : 10,
+  "treno" : {
+    "id" : "7731c479-c9d9-4a99-8673-4232c3a7e1bb",
+    "numero" : 103,
+    "tipologia" : "Regionale",
+    "capienzaTotale" : 96,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Regionale 103"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 34.79757571770996,
+      "promozione" : 27.83806057416797,
+      "fedelta" : 20.878545430625977
+    },
+    "GOLD" : {
+      "intero" : 48.06132538054562,
+      "promozione" : 38.4490603044365,
+      "fedelta" : 28.836795228327368
+    },
+    "BASE" : {
+      "intero" : 36.33298305157865,
+      "promozione" : 29.06638644126292,
+      "fedelta" : 21.79978983094719
+    }
+  }
+}, {
+  "id" : "a154caee-e920-48bc-8705-67a85715cd09",
+  "stazionePartenza" : "Torino",
+  "stazioneArrivo" : "Strongoli",
+  "data" : "2025-06-04",
+  "ora" : "20:00:00",
+  "binario" : 10,
+  "treno" : {
+    "id" : "a2f1139c-7ef9-4147-9eb5-0b4bb96fe9d5",
+    "numero" : 104,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 85,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 104"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 48.94044679162868,
+      "promozione" : 39.152357433302946,
+      "fedelta" : 29.364268074977208
+    },
+    "GOLD" : {
+      "intero" : 37.87071868856107,
+      "promozione" : 30.296574950848857,
+      "fedelta" : 22.72243121313664
+    },
+    "BASE" : {
+      "intero" : 26.205085540747724,
+      "promozione" : 20.964068432598182,
+      "fedelta" : 15.723051324448633
+    }
+  }
+}, {
+  "id" : "e84d04cc-833a-48ed-a8de-43dd15808bf1",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Milano",
+  "data" : "2025-06-05",
+  "ora" : "10:00:00",
+  "binario" : 9,
+  "treno" : {
+    "id" : "5fcfc94f-fbde-40ff-aa1f-4c4090aa353f",
+    "numero" : 100,
+    "tipologia" : "Regionale",
+    "capienzaTotale" : 114,
+    "wifiDisponibile" : false,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Regionale 100"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 35.01819553945863,
+      "promozione" : 28.014556431566906,
+      "fedelta" : 21.010917323675177
+    },
+    "GOLD" : {
+      "intero" : 30.28599640541503,
+      "promozione" : 24.228797124332026,
+      "fedelta" : 18.171597843249018
+    },
+    "BASE" : {
+      "intero" : 34.479980025540584,
+      "promozione" : 27.583984020432467,
+      "fedelta" : 20.68798801532435
+    }
+  }
+}, {
+  "id" : "539b73f3-3a55-46d6-ba8b-76eed380e90f",
+  "stazionePartenza" : "Roma",
+  "stazioneArrivo" : "Napoli",
+  "data" : "2025-06-05",
+  "ora" : "11:00:00",
+  "binario" : 3,
+  "treno" : {
+    "id" : "516395fe-557a-4d87-8db2-c301ada14826",
+    "numero" : 101,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 84,
+    "wifiDisponibile" : true,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 101"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 33.030934194441066,
+      "promozione" : 26.424747355552853,
+      "fedelta" : 19.81856051666464
+    },
+    "GOLD" : {
+      "intero" : 54.86349961251899,
+      "promozione" : 43.8907996900152,
+      "fedelta" : 32.91809976751139
+    },
+    "BASE" : {
+      "intero" : 31.404657746507205,
+      "promozione" : 25.123726197205766,
+      "fedelta" : 18.842794647904324
+    }
+  }
+}, {
+  "id" : "22e2789e-daa4-4830-bb3f-3f649a400578",
+  "stazionePartenza" : "Torino",
+  "stazioneArrivo" : "Milano",
+  "data" : "2025-06-05",
+  "ora" : "18:00:00",
+  "binario" : 4,
+  "treno" : {
+    "id" : "c288a565-abe9-4ec1-b611-f0b917e8c03a",
+    "numero" : 102,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 87,
+    "wifiDisponibile" : false,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 102"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 49.945513929096315,
+      "promozione" : 39.95641114327705,
+      "fedelta" : 29.96730835745779
+    },
+    "GOLD" : {
+      "intero" : 44.919631895434435,
+      "promozione" : 35.93570551634755,
+      "fedelta" : 26.95177913726066
+    },
+    "BASE" : {
+      "intero" : 21.30180453337435,
+      "promozione" : 17.041443626699483,
+      "fedelta" : 12.78108272002461
+    }
+  }
+}, {
+  "id" : "c1d35602-1f3c-4d93-9497-6e275c659998",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Milano",
+  "data" : "2025-06-05",
+  "ora" : "19:00:00",
+  "binario" : 10,
+  "treno" : {
+    "id" : "d5444bb3-9975-48ce-b768-03a9652c330b",
+    "numero" : 103,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 125,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 103"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 50.67499945021719,
+      "promozione" : 40.539999560173754,
+      "fedelta" : 30.404999670130316
+    },
+    "GOLD" : {
+      "intero" : 35.89785545326524,
+      "promozione" : 28.71828436261219,
+      "fedelta" : 21.538713271959143
+    },
+    "BASE" : {
+      "intero" : 28.992282538836456,
+      "promozione" : 23.193826031069165,
+      "fedelta" : 17.395369523301873
+    }
+  }
+}, {
+  "id" : "d37f2d45-d029-48a5-9873-4fe1c9faa318",
+  "stazionePartenza" : "Milano",
+  "stazioneArrivo" : "Torino",
+  "data" : "2025-06-05",
+  "ora" : "13:00:00",
+  "binario" : 6,
+  "treno" : {
+    "id" : "32a771c8-3467-4838-a67b-2a14f9d81d8c",
+    "numero" : 104,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 126,
+    "wifiDisponibile" : false,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 104"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 34.44689586213985,
+      "promozione" : 27.55751668971188,
+      "fedelta" : 20.668137517283906
+    },
+    "GOLD" : {
+      "intero" : 37.61606917010632,
+      "promozione" : 30.09285533608506,
+      "fedelta" : 22.569641502063792
+    },
+    "BASE" : {
+      "intero" : 32.14988811698892,
+      "promozione" : 25.719910493591136,
+      "fedelta" : 19.28993287019335
+    }
+  }
+}, {
+  "id" : "ac543512-d85d-4827-95eb-3aa6cc31a650",
+  "stazionePartenza" : "Roma",
+  "stazioneArrivo" : "ReggioCalabria",
+  "data" : "2025-06-06",
+  "ora" : "18:00:00",
+  "binario" : 5,
+  "treno" : {
+    "id" : "468d42a4-628a-4c88-9134-b20aa3a6feb7",
+    "numero" : 100,
+    "tipologia" : "Regionale",
+    "capienzaTotale" : 122,
+    "wifiDisponibile" : true,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Regionale 100"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 39.70332434692706,
+      "promozione" : 31.76265947754165,
+      "fedelta" : 23.821994608156235
+    },
+    "GOLD" : {
+      "intero" : 59.817918248958655,
+      "promozione" : 47.854334599166926,
+      "fedelta" : 35.89075094937519
+    },
+    "BASE" : {
+      "intero" : 16.505812724636524,
+      "promozione" : 13.204650179709219,
+      "fedelta" : 9.903487634781914
+    }
+  }
+}, {
+  "id" : "e3cc84e9-c7d2-4687-af9a-8fc0d4466559",
+  "stazionePartenza" : "Firenze",
+  "stazioneArrivo" : "ReggioCalabria",
+  "data" : "2025-06-06",
+  "ora" : "12:00:00",
+  "binario" : 3,
+  "treno" : {
+    "id" : "c26f31aa-27ac-42b4-ae89-9d80f016f2b0",
+    "numero" : 101,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 129,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 101"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 45.110438756357226,
+      "promozione" : 36.088351005085784,
+      "fedelta" : 27.066263253814334
+    },
+    "GOLD" : {
+      "intero" : 27.073975833405484,
+      "promozione" : 21.65918066672439,
+      "fedelta" : 16.24438550004329
+    },
+    "BASE" : {
+      "intero" : 23.313573166036896,
+      "promozione" : 18.650858532829517,
+      "fedelta" : 13.988143899622138
+    }
+  }
+}, {
+  "id" : "cfc34b5c-478b-4cdc-9bae-02655c4a5f48",
+  "stazionePartenza" : "Roma",
+  "stazioneArrivo" : "Napoli",
+  "data" : "2025-06-06",
+  "ora" : "10:00:00",
+  "binario" : 7,
+  "treno" : {
+    "id" : "90f28098-be85-40d8-bbc0-dc6270891476",
+    "numero" : 102,
+    "tipologia" : "Regionale",
+    "capienzaTotale" : 109,
+    "wifiDisponibile" : false,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Regionale 102"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 48.690621998861154,
+      "promozione" : 38.95249759908893,
+      "fedelta" : 29.21437319931669
+    },
+    "GOLD" : {
+      "intero" : 63.67577017055626,
+      "promozione" : 50.940616136445016,
+      "fedelta" : 38.205462102333755
+    },
+    "BASE" : {
+      "intero" : 19.48280699715827,
+      "promozione" : 15.586245597726617,
+      "fedelta" : 11.689684198294962
+    }
+  }
+}, {
+  "id" : "ec91dde7-ddd6-4a28-b7eb-12d9da4770e5",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Napoli",
+  "data" : "2025-06-06",
+  "ora" : "19:00:00",
+  "binario" : 4,
+  "treno" : {
+    "id" : "805dcfce-4d90-4201-b26d-2c97f2793f6b",
+    "numero" : 103,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 89,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 103"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 49.53504755535343,
+      "promozione" : 39.62803804428275,
+      "fedelta" : 29.721028533212056
+    },
+    "GOLD" : {
+      "intero" : 40.31413969151984,
+      "promozione" : 32.25131175321587,
+      "fedelta" : 24.188483814911905
+    },
+    "BASE" : {
+      "intero" : 28.870609081899246,
+      "promozione" : 23.0964872655194,
+      "fedelta" : 17.322365449139546
+    }
+  }
+}, {
+  "id" : "609560fe-e1a9-47a2-9277-b0d652eb765d",
+  "stazionePartenza" : "Rende",
+  "stazioneArrivo" : "Milano",
+  "data" : "2025-06-06",
+  "ora" : "21:00:00",
+  "binario" : 6,
+  "treno" : {
+    "id" : "13848723-e454-48f6-b876-11f1d7845e44",
+    "numero" : 104,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 113,
+    "wifiDisponibile" : false,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 104"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 36.51205100753832,
+      "promozione" : 29.209640806030656,
+      "fedelta" : 21.90723060452299
+    },
+    "GOLD" : {
+      "intero" : 36.72775328869765,
+      "promozione" : 29.38220263095812,
+      "fedelta" : 22.03665197321859
+    },
+    "BASE" : {
+      "intero" : 39.57494380117509,
+      "promozione" : 31.659955040940073,
+      "fedelta" : 23.744966280705054
+    }
+  }
+}, {
+  "id" : "c77a2b12-c91f-44c5-8d15-f2007fdeb774",
+  "stazionePartenza" : "Torino",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-07",
+  "ora" : "19:00:00",
+  "binario" : 2,
+  "treno" : {
+    "id" : "aa8c9bac-2f44-4222-a7ad-a51b72fcb226",
+    "numero" : 100,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 91,
+    "wifiDisponibile" : true,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 100"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 19.608045310389553,
+      "promozione" : 15.686436248311644,
+      "fedelta" : 11.764827186233731
+    },
+    "GOLD" : {
+      "intero" : 44.77915589769507,
+      "promozione" : 35.82332471815606,
+      "fedelta" : 26.86749353861704
+    },
+    "BASE" : {
+      "intero" : 23.652302115929437,
+      "promozione" : 18.921841692743552,
+      "fedelta" : 14.191381269557661
+    }
+  }
+}, {
+  "id" : "767d3c59-6bab-4f7b-8cd7-3cfec25d1152",
+  "stazionePartenza" : "Strongoli",
+  "stazioneArrivo" : "Torino",
+  "data" : "2025-06-07",
+  "ora" : "06:00:00",
+  "binario" : 8,
+  "treno" : {
+    "id" : "77f6031f-79e6-45af-8a5f-10a2aebaa83f",
+    "numero" : 101,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 81,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 101"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 36.552214532797734,
+      "promozione" : 29.24177162623819,
+      "fedelta" : 21.93132871967864
+    },
+    "GOLD" : {
+      "intero" : 43.720277182012126,
+      "promozione" : 34.9762217456097,
+      "fedelta" : 26.232166309207276
+    },
+    "BASE" : {
+      "intero" : 23.174359641850458,
+      "promozione" : 18.539487713480366,
+      "fedelta" : 13.904615785110275
+    }
+  }
+}, {
+  "id" : "9423a75b-a67a-4810-aa49-c73ee458d1c7",
+  "stazionePartenza" : "Strongoli",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-07",
+  "ora" : "06:00:00",
+  "binario" : 6,
+  "treno" : {
+    "id" : "da69431b-30bc-4814-b133-7f630d6f1657",
+    "numero" : 102,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 115,
+    "wifiDisponibile" : false,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 102"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 46.626037313495566,
+      "promozione" : 37.300829850796454,
+      "fedelta" : 27.97562238809734
+    },
+    "GOLD" : {
+      "intero" : 25.486575060303228,
+      "promozione" : 20.389260048242583,
+      "fedelta" : 15.291945036181936
+    },
+    "BASE" : {
+      "intero" : 32.503016338233095,
+      "promozione" : 26.002413070586478,
+      "fedelta" : 19.501809802939857
+    }
+  }
+}, {
+  "id" : "ef156293-2584-485c-8823-a54e24727447",
+  "stazionePartenza" : "Milano",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-07",
+  "ora" : "20:00:00",
+  "binario" : 10,
+  "treno" : {
+    "id" : "85ab74c4-ad83-4bee-b4f8-5b860566edc0",
+    "numero" : 103,
+    "tipologia" : "Regionale",
+    "capienzaTotale" : 100,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Regionale 103"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 24.477014338058584,
+      "promozione" : 19.58161147044687,
+      "fedelta" : 14.68620860283515
+    },
+    "GOLD" : {
+      "intero" : 62.16293837289452,
+      "promozione" : 49.73035069831562,
+      "fedelta" : 37.297763023736714
+    },
+    "BASE" : {
+      "intero" : 36.934353741111025,
+      "promozione" : 29.54748299288882,
+      "fedelta" : 22.160612244666613
+    }
+  }
+}, {
+  "id" : "92a854f1-abbd-4efa-b25c-28fd153d400a",
+  "stazionePartenza" : "Roma",
+  "stazioneArrivo" : "Napoli",
+  "data" : "2025-06-07",
+  "ora" : "19:00:00",
+  "binario" : 1,
+  "treno" : {
+    "id" : "bd35aed2-89b7-485d-ad2d-a8b33e5529bc",
+    "numero" : 104,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 87,
+    "wifiDisponibile" : true,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 104"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 48.78070027701309,
+      "promozione" : 39.02456022161047,
+      "fedelta" : 29.268420166207854
+    },
+    "GOLD" : {
+      "intero" : 54.39164690507087,
+      "promozione" : 43.5133175240567,
+      "fedelta" : 32.63498814304252
+    },
+    "BASE" : {
+      "intero" : 23.096587941390073,
+      "promozione" : 18.477270353112058,
+      "fedelta" : 13.857952764834044
+    }
+  }
+}, {
+  "id" : "ed105f96-0d05-44f8-9975-d65b50b9fa63",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Torino",
+  "data" : "2025-06-08",
+  "ora" : "15:00:00",
+  "binario" : 7,
+  "treno" : {
+    "id" : "a4fecac5-f012-4121-9883-77285066a06e",
+    "numero" : 100,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 123,
+    "wifiDisponibile" : false,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 100"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 33.94245562446404,
+      "promozione" : 27.15396449957123,
+      "fedelta" : 20.365473374678423
+    },
+    "GOLD" : {
+      "intero" : 55.36405258881655,
+      "promozione" : 44.29124207105324,
+      "fedelta" : 33.218431553289925
+    },
+    "BASE" : {
+      "intero" : 24.264089745425885,
+      "promozione" : 19.41127179634071,
+      "fedelta" : 14.55845384725553
+    }
+  }
+}, {
+  "id" : "316322f3-1d68-4e1e-80e7-80c4aa5e16f5",
+  "stazionePartenza" : "Rende",
+  "stazioneArrivo" : "Milano",
+  "data" : "2025-06-08",
+  "ora" : "11:00:00",
+  "binario" : 6,
+  "treno" : {
+    "id" : "7df3b975-4fb8-4943-acd4-91c8f6cc87ed",
+    "numero" : 101,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 85,
+    "wifiDisponibile" : true,
+    "preseElettriche" : false,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 101"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 46.86718829732919,
+      "promozione" : 37.49375063786336,
+      "fedelta" : 28.120312978397514
+    },
+    "GOLD" : {
+      "intero" : 50.96779895858634,
+      "promozione" : 40.77423916686908,
+      "fedelta" : 30.580679375151803
+    },
+    "BASE" : {
+      "intero" : 18.456776094203743,
+      "promozione" : 14.765420875362995,
+      "fedelta" : 11.074065656522246
+    }
+  }
+}, {
+  "id" : "bace2e2d-0515-4886-a7df-fd1576219b52",
+  "stazionePartenza" : "Milano",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-08",
+  "ora" : "09:00:00",
+  "binario" : 3,
+  "treno" : {
+    "id" : "2001d2ff-a49a-42e3-a1ea-a3771f188354",
+    "numero" : 102,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 128,
+    "wifiDisponibile" : true,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Nessuno",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 102"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 33.03814657502391,
+      "promozione" : 26.43051726001913,
+      "fedelta" : 19.822887945014344
+    },
+    "GOLD" : {
+      "intero" : 57.95226720603088,
+      "promozione" : 46.36181376482471,
+      "fedelta" : 34.77136032361853
+    },
+    "BASE" : {
+      "intero" : 25.811017612262468,
+      "promozione" : 20.648814089809974,
+      "fedelta" : 15.48661056735748
+    }
+  }
+}, {
+  "id" : "aabcce0f-c642-4834-99c1-62bbde8edd59",
+  "stazionePartenza" : "Firenze",
+  "stazioneArrivo" : "Roma",
+  "data" : "2025-06-08",
+  "ora" : "15:00:00",
+  "binario" : 9,
+  "treno" : {
+    "id" : "9656a4bc-5a3b-49b9-83fb-6a24d2228839",
+    "numero" : 103,
+    "tipologia" : "Frecciarossa",
+    "capienzaTotale" : 110,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciarossa 103"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 47.14369500528385,
+      "promozione" : 37.71495600422708,
+      "fedelta" : 28.28621700317031
+    },
+    "GOLD" : {
+      "intero" : 44.366126508631034,
+      "promozione" : 35.492901206904826,
+      "fedelta" : 26.61967590517862
+    },
+    "BASE" : {
+      "intero" : 16.092937688339944,
+      "promozione" : 12.874350150671956,
+      "fedelta" : 9.655762613003967
+    }
+  }
+}, {
+  "id" : "f533ea60-7957-4d71-b1d6-31e486190b88",
+  "stazionePartenza" : "ReggioCalabria",
+  "stazioneArrivo" : "Rende",
+  "data" : "2025-06-08",
+  "ora" : "21:00:00",
+  "binario" : 2,
+  "treno" : {
+    "id" : "722f1ca3-1ddf-439d-b9f7-a34f210fb337",
+    "numero" : 104,
+    "tipologia" : "Regionale",
+    "capienzaTotale" : 84,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Regionale 104"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 32.080854320749715,
+      "promozione" : 25.664683456599775,
+      "fedelta" : 19.248512592449828
+    },
+    "GOLD" : {
+      "intero" : 31.330515252396413,
+      "promozione" : 25.064412201917133,
+      "fedelta" : 18.79830915143785
+    },
+    "BASE" : {
+      "intero" : 29.8389635921245,
+      "promozione" : 23.8711708736996,
+      "fedelta" : 17.903378155274698
+    }
+  }
+} ]
