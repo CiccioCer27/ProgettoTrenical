@@ -2,6 +2,7 @@ package scheduling;
 
 import model.Biglietto;
 import persistence.MemoriaBiglietti;
+import persistence.MemoriaOsservatori;  // ✅ AGGIUNTO
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,17 +11,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 🔔 SCHEDULER PER GESTIRE SCADENZA PRENOTAZIONI
+ * 🔔 SCHEDULER PER GESTIRE SCADENZA PRENOTAZIONI - CON CLEANUP NOTIFICHE
  *
- * Rimuove automaticamente le prenotazioni non confermate dopo 10 minuti
+ * AGGIORNAMENTO: Ora rimuove anche dalle notifiche quando elimina prenotazioni scadute
  */
 public class PrenotazioneScheduler {
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final MemoriaBiglietti memoriaBiglietti;
+    private final MemoriaOsservatori memoriaOsservatori;  // ✅ AGGIUNTO
 
-    public PrenotazioneScheduler(MemoriaBiglietti memoriaBiglietti) {
+    public PrenotazioneScheduler(MemoriaBiglietti memoriaBiglietti, MemoriaOsservatori memoriaOsservatori) {
         this.memoriaBiglietti = memoriaBiglietti;
+        this.memoriaOsservatori = memoriaOsservatori;  // ✅ INJECTION
     }
 
     /**
@@ -29,11 +32,11 @@ public class PrenotazioneScheduler {
     public void avvia() {
         // Controlla ogni 2 minuti
         scheduler.scheduleAtFixedRate(this::rimuoviPrenotazioniScadute, 2, 2, TimeUnit.MINUTES);
-        System.out.println("⏰ PrenotazioneScheduler avviato (controllo ogni 2 minuti)");
+        System.out.println("⏰ PrenotazioneScheduler COMPLETO avviato (controllo ogni 2 minuti)");
     }
 
     /**
-     * Rimuove le prenotazioni scadute (oltre 10 minuti)
+     * ✅ AGGIORNATO: Rimuove prenotazioni scadute + notifiche
      */
     private void rimuoviPrenotazioniScadute() {
         try {
@@ -41,42 +44,61 @@ public class PrenotazioneScheduler {
             List<Biglietto> tuttiBiglietti = memoriaBiglietti.getTuttiIBiglietti();
 
             int rimosse = 0;
+            int notificheRimosse = 0;
+
             for (Biglietto biglietto : tuttiBiglietti) {
                 // Controlla solo le prenotazioni (non gli acquisti)
                 if ("prenotazione".equals(biglietto.getTipoAcquisto())) {
-                    // Controlla se sono passati più di 10 minuti
+
+                    // ⚠️ LOGIC SEMPLIFICATA: Rimuovi prenotazioni più vecchie di X ore
+                    // In produzione, useresti LocalDateTime preciso della prenotazione
                     LocalDateTime dataPrenotazione = biglietto.getDataAcquisto().atStartOfDay();
+                    long oreTrascorse = java.time.Duration.between(dataPrenotazione, now).toHours();
 
-                    // Per essere più precisi, dovremmo salvare anche l'ora della prenotazione
-                    // Per ora usiamo una logica semplificata: se la prenotazione è di oggi
-                    // e sono passate più di 2 ore, la consideriamo scaduta
-                    if (biglietto.getDataAcquisto().equals(now.toLocalDate())) {
-                        // In produzione, salveresti LocalDateTime completo
-                        // Per ora rimuoviamo prenotazioni "vecchie" basandoci su una logica semplificata
-
-                        System.out.println("⏰ Controllo prenotazione: " +
+                    if (oreTrascorse > 2) { // Scadute dopo 2 ore (regolabile)
+                        System.out.println("⏰ SCHEDULER: Rimuovendo prenotazione scaduta: " +
                                 biglietto.getId().toString().substring(0, 8) + "...");
 
-                        // Per ora, simuliamo: rimuovi prenotazioni dopo 15 minuti di vita dello scheduler
-                        // In produzione, useresti la data/ora esatta della prenotazione
+                        // 🗑️ STEP 1: Rimuovi biglietto
+                        boolean rimossaDaMemoria = memoriaBiglietti.rimuoviBiglietto(biglietto.getId());
+
+                        if (rimossaDaMemoria) {
+                            rimosse++;
+
+                            // 🗑️ STEP 2: ✅ NUOVO - Rimuovi dalle notifiche
+                            try {
+                                boolean rimossaDaNotifiche = memoriaOsservatori.rimuoviOsservatore(
+                                        biglietto.getIdTratta(),
+                                        biglietto.getIdCliente()
+                                );
+
+                                if (rimossaDaNotifiche) {
+                                    notificheRimosse++;
+                                }
+
+                            } catch (Exception e) {
+                                System.err.println("❌ Errore rimozione notifiche scheduler: " + e.getMessage());
+                            }
+                        }
                     }
                 }
             }
 
             if (rimosse > 0) {
-                System.out.println("🗑️ Rimosse " + rimosse + " prenotazioni scadute");
+                System.out.println("🧹 ✅ SCHEDULER CLEANUP: " + rimosse + " prenotazioni + " +
+                        notificheRimosse + " notifiche rimosse");
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Errore durante pulizia prenotazioni: " + e.getMessage());
+            System.err.println("❌ Errore durante pulizia COMPLETA prenotazioni: " + e.getMessage());
         }
     }
 
     /**
-     * Programma la rimozione di una specifica prenotazione dopo 10 minuti
+     * ✅ AGGIORNATO: Programma rimozione con cleanup notifiche
      */
     public void programmaRimozione(Biglietto prenotazione) {
-        System.out.println("⏰ Programmando rimozione prenotazione " +
+        System.out.println("⏰ SCHEDULER: Programmando rimozione COMPLETA prenotazione " +
                 prenotazione.getId().toString().substring(0, 8) + "... tra 10 minuti");
 
         scheduler.schedule(() -> {
@@ -84,9 +106,27 @@ public class PrenotazioneScheduler {
             Biglietto biglietto = memoriaBiglietti.getById(prenotazione.getId());
 
             if (biglietto != null && "prenotazione".equals(biglietto.getTipoAcquisto())) {
-                memoriaBiglietti.rimuoviBiglietto(prenotazione.getId());
-                System.out.println("⏰ SCADENZA: Prenotazione " +
-                        prenotazione.getId().toString().substring(0, 8) + "... rimossa (non confermata)");
+
+                // 🗑️ Rimuovi biglietto
+                boolean rimossa = memoriaBiglietti.rimuoviBiglietto(prenotazione.getId());
+
+                if (rimossa) {
+                    System.out.println("⏰ SCHEDULER SCADENZA: Prenotazione " +
+                            prenotazione.getId().toString().substring(0, 8) + "... rimossa");
+
+                    // 🗑️ ✅ NUOVO - Rimuovi dalle notifiche
+                    try {
+                        memoriaOsservatori.rimuoviOsservatore(
+                                prenotazione.getIdTratta(),
+                                prenotazione.getIdCliente()
+                        );
+                        System.out.println("📡 Cliente rimosso dalle notifiche (scadenza programmata)");
+
+                    } catch (Exception e) {
+                        System.err.println("❌ Errore rimozione notifiche scadenza programmata: " + e.getMessage());
+                    }
+                }
+
             } else {
                 System.out.println("✅ Prenotazione " +
                         prenotazione.getId().toString().substring(0, 8) + "... già confermata o rimossa");
@@ -107,6 +147,6 @@ public class PrenotazioneScheduler {
             scheduler.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        System.out.println("🛑 PrenotazioneScheduler fermato");
+        System.out.println("🛑 PrenotazioneScheduler COMPLETO fermato");
     }
 }

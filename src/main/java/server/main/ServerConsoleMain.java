@@ -19,7 +19,15 @@ import java.util.Map;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
-
+import eventi.ListaEventiS;
+import eventi.EventoPromoGen;
+import eventi.EventoPromoFedelta;
+import eventi.EventoPromoTratta;
+import observer.NotificaEventiListener;
+import observer.EventoLoggerListener;
+import factory.PromozioneGeneraleFactory;
+import model.PromozioneFedelta;
+import model.PromozioneTratta;
 /**
  * 🖥️ SERVER CONSOLE MAIN THREAD-SAFE
  *
@@ -80,11 +88,13 @@ public class ServerConsoleMain {
         memoriaClientiFedeli = new MemoriaClientiFedeli();
         memoriaTratte = new MemoriaTratte();
         memoriaPromozioni = new MemoriaPromozioni();
+        memoriaOsservatori = new MemoriaOsservatori();
 
         System.out.println("💾 Componenti memoria caricate (THREAD-SAFE):");
         System.out.println("   🎫 Biglietti: " + memoriaBiglietti.getTuttiIBiglietti().size());
         System.out.println("   🚂 Tratte: " + memoriaTratte.getTutteTratte().size());
         System.out.println("   🎉 Promozioni: " + memoriaPromozioni.getPromozioniAttive().size());
+        System.out.println("   👁️ Osservatori: Inizializzati");
 
         // 3. Genera tratte se necessario
         if (memoriaTratte.getTutteTratte().isEmpty()) {
@@ -97,32 +107,50 @@ public class ServerConsoleMain {
             System.out.println("✅ Generate " + memoriaTratte.getTutteTratte().size() + " tratte");
         }
 
-        // 4. Client banca e handler THREAD-SAFE (SENZA EventDispatcher)
+        // 4. Client banca e handler THREAD-SAFE
         BancaServiceClient bancaClient = new BancaServiceClient("localhost", BANCA_PORT);
-
-        // ✅ CORREZIONE: Usa il nuovo costruttore ServerRequestHandler
         ServerRequestHandler handler = new ServerRequestHandler(
-                memoriaBiglietti, memoriaClientiFedeli, memoriaTratte, bancaClient,memoriaOsservatori
+                memoriaBiglietti, memoriaClientiFedeli, memoriaTratte, bancaClient, memoriaOsservatori
         );
 
-        // 5. Solo notifiche gRPC (senza eventi interni complessi)
+        // 5. Dispatcher per notifiche gRPC
         GrpcNotificaDispatcher notificaDispatcher = new GrpcNotificaDispatcher();
 
-        // 6. Servizio gRPC
+        // 6. ✅ SERVIZIO gRPC (PRIMA della configurazione listeners!)
         trenicalService = new TrenicalServiceImpl(notificaDispatcher, handler, memoriaPromozioni);
 
-        // 7. Server TreniCal
+        // 7. ✅ OBSERVER PATTERN con Dependency Injection per broadcast promozioni
+        System.out.println("🔄 Configurazione Observer Pattern per broadcast promozioni...");
+
+        // ✅ Listener con riferimento al servizio gRPC per broadcast
+        NotificaEventiListener notificaListener = new NotificaEventiListener(
+                notificaDispatcher,
+                memoriaTratte,
+                memoriaBiglietti,  // ✅ AGGIUNTO per notifiche clienti con biglietti
+                trenicalService    // ✅ INJECTION per broadcast promozioni!
+        );
+        ListaEventiS.getInstance().aggiungi(notificaListener);
+
+        // Listener per audit/logging
+        EventoLoggerListener loggerListener = new EventoLoggerListener();
+        ListaEventiS.getInstance().aggiungi(loggerListener);
+
+        System.out.println("   ✅ NotificaEventiListener registrato (con broadcast gRPC)");
+        System.out.println("   ✅ EventoLoggerListener registrato (audit/logging)");
+
+        // 8. Server TreniCal
         server = ServerBuilder.forPort(SERVER_PORT)
                 .addService(trenicalService)
                 .build()
                 .start();
         System.out.println("✅ Server TreniCal THREAD-SAFE avviato sulla porta " + SERVER_PORT);
         System.out.println("🔒 Controllo capienza atomico: ATTIVO");
+        System.out.println("📡 Auto-iscrizione notifiche: ATTIVA");
+        System.out.println("🎉 Broadcast promozioni: ATTIVO");  // ✅ NUOVO
         System.out.println("📊 " + memoriaBiglietti.getStatistiche());
 
         System.out.println("🎯 Sistema server operativo in modalità THREAD-SAFE!");
     }
-
     private static boolean mostraMenuAmministrazione() {
         System.out.println("\n" + "=".repeat(50));
         System.out.println("🏠 CONSOLE AMMINISTRAZIONE TRENICAL THREAD-SAFE");
@@ -296,6 +324,7 @@ public class ServerConsoleMain {
         System.out.println("1. 📋 Visualizza promozioni attive");
         System.out.println("2. ➕ Crea promozione generale");
         System.out.println("3. 💎 Crea promozione fedeltà");
+        System.out.println("4. 🚂 Crea promozione tratta");  // ✅ NUOVO
         System.out.println("0. ⬅️ Torna al menu principale");
 
         System.out.print("Scegli operazione: ");
@@ -303,11 +332,159 @@ public class ServerConsoleMain {
 
         switch (scelta) {
             case 1 -> visualizzaPromozioniAttive();
-            case 2 -> System.out.println("⚠️ Funzione in sviluppo (thread-safe)");
-            case 3 -> System.out.println("⚠️ Funzione in sviluppo (thread-safe)");
+            case 2 -> creaPromozioneGenerale();      // ✅ ATTIVATO
+            case 3 -> creaPromozioneFedelta();       // ✅ ATTIVATO
+            case 4 -> creaPromozioneTratta();        // ✅ NUOVO
             case 0 -> { /* torna al menu */ }
             default -> System.out.println("❌ Opzione non valida!");
         }
+    }
+
+    // ✅ NUOVO: Implementazione creazione promozione generale
+    private static void creaPromozioneGenerale() {
+        System.out.println("\n🎉 === CREAZIONE PROMOZIONE GENERALE ===");
+
+        System.out.print("🎯 Nome promozione: ");
+        String nome = scanner.nextLine().trim();
+
+        System.out.print("📝 Descrizione: ");
+        String descrizione = scanner.nextLine().trim();
+
+        System.out.print("💸 Sconto (es. 0.30 per 30%): ");
+        double sconto = Double.parseDouble(scanner.nextLine().trim());
+
+        System.out.print("📅 Data inizio (YYYY-MM-DD): ");
+        java.time.LocalDate inizio = java.time.LocalDate.parse(scanner.nextLine().trim());
+
+        System.out.print("📅 Data fine (YYYY-MM-DD): ");
+        java.time.LocalDate fine = java.time.LocalDate.parse(scanner.nextLine().trim());
+
+        // Crea promozione usando factory
+        factory.PromozioneGeneraleFactory factory = new factory.PromozioneGeneraleFactory();
+        model.Promozione promozione = factory.creaPromozione(nome, descrizione, sconto, inizio, fine);
+
+        // ✅ SALVA in memoria
+        memoriaPromozioni.aggiungiPromozione(promozione);
+        System.out.println("💾 Promozione salvata in memoria");
+
+        // ✅ GENERA evento per broadcast ai client
+        eventi.ListaEventiS.getInstance().notifica(new eventi.EventoPromoGen(promozione));
+        System.out.println("📡 Evento generato per broadcast ai client");
+
+        System.out.println("✅ Promozione generale creata e notificata con successo!");
+        System.out.println("🎯 Nome: " + nome);
+        System.out.println("💸 Sconto: " + (sconto * 100) + "%");
+        System.out.println("📅 Periodo: " + inizio + " → " + fine);
+
+        pausaETornaMenu();
+    }
+
+    // ✅ NUOVO: Implementazione creazione promozione fedeltà
+    private static void creaPromozioneFedelta() {
+        System.out.println("\n💎 === CREAZIONE PROMOZIONE FEDELTÀ ===");
+
+        System.out.print("🎯 Nome promozione: ");
+        String nome = scanner.nextLine().trim();
+
+        System.out.print("📝 Descrizione: ");
+        String descrizione = scanner.nextLine().trim();
+
+        System.out.print("💸 Sconto fedeltà (es. 0.30 per 30%): ");
+        double sconto = Double.parseDouble(scanner.nextLine().trim());
+
+        System.out.print("📅 Data inizio (YYYY-MM-DD): ");
+        java.time.LocalDate inizio = java.time.LocalDate.parse(scanner.nextLine().trim());
+
+        System.out.print("📅 Data fine (YYYY-MM-DD): ");
+        java.time.LocalDate fine = java.time.LocalDate.parse(scanner.nextLine().trim());
+
+        // Crea promozione fedeltà
+        model.PromozioneFedelta promozione = new model.PromozioneFedelta(nome, descrizione, sconto, inizio, fine);
+
+        // ✅ SALVA in memoria
+        memoriaPromozioni.aggiungiPromozione(promozione);
+        System.out.println("💾 Promozione salvata in memoria");
+
+        // ✅ GENERA evento per broadcast ai client
+        eventi.ListaEventiS.getInstance().notifica(new eventi.EventoPromoFedelta(promozione));
+        System.out.println("📡 Evento generato per broadcast ai client");
+
+        System.out.println("✅ Promozione fedeltà creata e notificata con successo!");
+        System.out.println("🎯 Nome: " + nome);
+        System.out.println("💸 Sconto: " + (sconto * 100) + "%");
+        System.out.println("📅 Periodo: " + inizio + " → " + fine);
+
+        pausaETornaMenu();
+    }
+
+    // ✅ NUOVO: Implementazione creazione promozione tratta
+    private static void creaPromozioneTratta() {
+        System.out.println("\n🚂 === CREAZIONE PROMOZIONE TRATTA ===");
+
+        System.out.print("🔧 Nome promozione: ");
+        String nome = scanner.nextLine().trim();
+
+        System.out.print("📄 Descrizione promozione: ");
+        String descrizione = scanner.nextLine().trim();
+
+        System.out.print("💸 Sconto (0.1 = 10%, 0.3 = 30%): ");
+        double sconto = Double.parseDouble(scanner.nextLine().trim());
+
+        System.out.print("📅 Durata in giorni: ");
+        int giorni = Integer.parseInt(scanner.nextLine().trim());
+
+        // Mostra tratte disponibili
+        System.out.println("\n📋 Tratte disponibili:");
+        var tratte = memoriaTratte.getTutteTratte();
+
+        if (tratte.isEmpty()) {
+            System.out.println("❌ Nessuna tratta disponibile. Genera prima alcune tratte.");
+            pausaETornaMenu();
+            return;
+        }
+
+        for (int i = 0; i < Math.min(tratte.size(), 10); i++) { // Mostra max 10 tratte
+            var tratta = tratte.get(i);
+            System.out.println((i + 1) + ") " + tratta.getStazionePartenza() + " → " +
+                    tratta.getStazioneArrivo() + " (" + tratta.getId().toString().substring(0, 8) + "...)");
+        }
+
+        System.out.print("\n🎯 Inserisci gli indici delle tratte separate da virgola (es: 1,3,5): ");
+        String input = scanner.nextLine().trim();
+
+        try {
+            java.util.Set<java.util.UUID> tratteTarget = java.util.Arrays.stream(input.split(","))
+                    .map(String::trim)
+                    .map(Integer::parseInt)
+                    .map(i -> tratte.get(i - 1).getId())
+                    .collect(java.util.stream.Collectors.toSet());
+
+            java.time.LocalDate inizio = java.time.LocalDate.now();
+            java.time.LocalDate fine = inizio.plusDays(giorni);
+
+            // Crea promozione tratta
+            model.PromozioneTratta promo = new model.PromozioneTratta(nome, descrizione, sconto, inizio, fine, tratteTarget);
+
+            // ✅ SALVA in memoria
+            memoriaPromozioni.aggiungiPromozione(promo);
+            System.out.println("💾 Promozione salvata in memoria");
+
+            // ✅ GENERA evento per broadcast ai client
+            eventi.ListaEventiS.getInstance().notifica(new eventi.EventoPromoTratta(promo));
+            System.out.println("📡 Evento generato per broadcast ai client");
+
+            System.out.println("✅ Promozione tratta creata e notificata!");
+            System.out.println("🎯 Nome: " + nome);
+            System.out.println("💸 Sconto: " + (sconto * 100) + "%");
+            System.out.println("🚂 Tratte coinvolte: " + tratteTarget.size());
+            System.out.println("📅 Periodo: " + inizio + " → " + fine);
+
+        } catch (Exception e) {
+            System.out.println("❌ Errore nella selezione tratte: " + e.getMessage());
+            System.out.println("💡 Usa il formato: 1,2,3 (numeri separati da virgole)");
+        }
+
+        pausaETornaMenu();
     }
 
     private static void visualizzaPromozioniAttive() {

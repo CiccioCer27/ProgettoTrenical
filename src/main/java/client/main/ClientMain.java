@@ -53,7 +53,24 @@ public class ClientMain {
         walletPromozioni = new WalletPromozioni();
         ListaEventi.getInstance().aggiungiObserver(wallet);
         ListaEventi.getInstance().aggiungiObserver(walletPromozioni);
+
+        // ✅ NUOVO: Avvia stream promozioni gRPC
+        avviaStreamPromozioni();
+
         System.out.println("💼 Wallet attivato e collegato al sistema eventi");
+        System.out.println("🎉 Stream promozioni attivato");  // ✅ NUOVO
+    }
+
+    // ✅ NUOVO: Metodo per avviare stream promozioni
+    private static void avviaStreamPromozioni() {
+        try {
+            grpc.PromozioneGrpcListener promoListener = new grpc.PromozioneGrpcListener("localhost", SERVER_PORT);
+            promoListener.avviaStreamPromozioni();
+            System.out.println("📡 Connesso al stream promozioni del server");
+        } catch (Exception e) {
+            System.err.println("⚠️ Errore connessione stream promozioni: " + e.getMessage());
+            System.err.println("💡 Le promozioni potrebbero non essere ricevute in tempo reale");
+        }
     }
 
     private static boolean mostraMenuPrincipale() {

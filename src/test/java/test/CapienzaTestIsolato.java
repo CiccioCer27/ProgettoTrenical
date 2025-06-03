@@ -68,6 +68,7 @@ public class CapienzaTestIsolato {
         memoriaClienti = new MemoriaClientiFedeli();
         memoriaTratte = new MemoriaTratte();
         MemoriaPromozioni memoriaPromozioni = new MemoriaPromozioni();
+        MemoriaOsservatori memoriaOsservatori=new MemoriaOsservatori();
 
         // Crea tratta test
         setupTrattaTest();
@@ -75,7 +76,7 @@ public class CapienzaTestIsolato {
         // ✅ Handler SENZA EventDispatcher (architettura refactored)
         BancaServiceClient bancaClient = new BancaServiceClient("localhost", TEST_BANCA_PORT);
         ServerRequestHandler handler = new ServerRequestHandler(
-                memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient
+                memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient,memoriaOsservatori
         );
 
         // Solo notifiche gRPC (no eventi persistenza)

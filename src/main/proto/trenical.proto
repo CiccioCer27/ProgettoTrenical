@@ -4,14 +4,28 @@ option java_multiple_files = true;
 option java_package = "grpc";
 option java_outer_classname = "TrenicalProto";
 
+// ================================================================================
+// 🎉 PROMOZIONI
+// ================================================================================
+
 message PromozioneGrpc {
     string nome = 1;
     string descrizione = 2;
-    string dataInizio = 3;
-    string dataFine = 4;
+    string dataInizio = 3;    // ISO LocalDateTime string
+    string dataFine = 4;      // ISO LocalDateTime string
+
+    // ✅ NUOVO: Tipo promozione per distinzione client-side
+    string tipo = 5;          // "GENERALE", "FEDELTA", "TRATTA"
+    double percentualeSconto = 6;  // 0.0-1.0 per calcoli client-side
 }
 
-message RichiestaPromozioni {}
+message RichiestaPromozioni {
+    // Vuoto - il client richiede tutte le promozioni attive
+}
+
+// ================================================================================
+// 🚂 RICHIESTE/RISPOSTE PRINCIPALI
+// ================================================================================
 
 message RichiestaGrpc {
     string tipo = 1;
@@ -27,53 +41,158 @@ message RichiestaGrpc {
     string tipoPrezzo = 7;
     double penale = 8;
 
-    // Parametri per ricerca
+    // Parametri per ricerca tratte
     string data = 9;
     string partenza = 10;
     string arrivo = 11;
     string tipoTreno = 12;
     string fasciaOraria = 13;
+
+    // ✅ NUOVO: Parametri aggiuntivi per flessibilità futura
+    map<string, string> parametriExtra = 14;
 }
+
+message RispostaGrpc {
+    string esito = 1;           // "OK" | "KO"
+    string messaggio = 2;       // Messaggio descrittivo
+    optional BigliettoGrpc biglietto = 3;
+    repeated TrattaGrpc tratte = 4;
+
+    // ✅ NUOVO: Informazioni aggiuntive per debugging/logging
+    int64 timestamp = 5;        // Timestamp risposta server
+    string serverVersion = 6;   // Versione server per diagnostica
+}
+
+// ================================================================================
+// 🎫 BIGLIETTI
+// ================================================================================
 
 message BigliettoGrpc {
     string id = 1;
     string idCliente = 2;
     string idTratta = 3;
-    string classe = 4;
-    string tipoAcquisto = 5;
+    string classe = 4;              // "BASE", "ARGENTO", "GOLD"
+    string tipoAcquisto = 5;        // "acquisto", "prenotazione", "modifica"
     double prezzoPagato = 6;
-    string dataAcquisto = 7;
+    string dataAcquisto = 7;        // ISO LocalDate string
     bool conCartaFedelta = 8;
+
+    // ✅ NUOVO: Stato più dettagliato
+    string stato = 9;               // "CONFERMATO", "NON_CONFERMATO", "SCADUTO"
+    string tipoPrezzo = 10;         // "INTERO", "FEDELTA", "PROMOZIONE"
+
+    // ✅ NUOVO: Scadenza per prenotazioni
+    optional string dataScadenza = 11;  // ISO LocalDateTime per prenotazioni
 }
+
+// ================================================================================
+// 🚂 TRATTE
+// ================================================================================
 
 message TrattaGrpc {
     string id = 1;
     string stazionePartenza = 2;
     string stazioneArrivo = 3;
-    string data = 4;
-    string ora = 5;
+    string data = 4;                // ISO LocalDate string
+    string ora = 5;                 // ISO LocalTime string
     string binario = 6;
     string tipoTreno = 7;
+
+    // ✅ NUOVO: Informazioni aggiuntive per client
+    int32 postiDisponibili = 8;     // Posti liberi in tempo reale
+    int32 capienzaTotale = 9;       // Capienza massima
+    bool ritardo = 10;              // Se il treno è in ritardo
+    int32 minutiRitardo = 11;       // Minuti di ritardo
+
+    // ✅ NUOVO: Prezzi per tutte le classi
+    map<string, PrezzoGrpc> prezzi = 12; // Chiave: "BASE", "ARGENTO", "GOLD"
 }
 
-message RispostaGrpc {
-    string esito = 1;
-    string messaggio = 2;
-    optional BigliettoGrpc biglietto = 3;
-    repeated TrattaGrpc tratte = 4;
+// ✅ NUOVO: Struttura prezzi dettagliata
+message PrezzoGrpc {
+    double prezzoIntero = 1;
+    double prezzoPromozione = 2;
+    double prezzoFedelta = 3;
 }
+
+// ================================================================================
+// 📡 NOTIFICHE TRATTE
+// ================================================================================
 
 message IscrizioneNotificheGrpc {
     string emailCliente = 1;
     string trattaId = 2;
+
+    // ✅ NUOVO: Tipo notifiche desiderate
+    repeated string tipiNotifica = 3;  // "RITARDO", "BINARIO", "CANCELLAZIONE", "TUTTE"
 }
 
 message NotificaTrattaGrpc {
     string messaggio = 1;
+    string trattaId = 2;
+
+    // ✅ NUOVO: Classificazione notifiche
+    string tipoNotifica = 3;        // "RITARDO", "BINARIO", "CANCELLAZIONE", "MODIFICA", "INFO"
+    string timestamp = 4;           // ISO LocalDateTime della notifica
+    int32 priorita = 5;             // 1=bassa, 2=media, 3=alta, 4=critica
+
+    // ✅ NUOVO: Dati strutturati per alcuni tipi
+    optional DatiNotificaGrpc dati = 6;
 }
 
+// ✅ NUOVO: Dati strutturati per notifiche specifiche
+message DatiNotificaGrpc {
+    // Per notifiche di ritardo
+    optional int32 minutiRitardo = 1;
+    optional string nuovoOrario = 2;
+
+    // Per notifiche cambio binario
+    optional string nuovoBinario = 3;
+    optional string vecchioBinario = 4;
+
+    // Per cancellazioni
+    optional string motivoCancellazione = 5;
+    optional bool rimborsoAutomatico = 6;
+}
+
+// ================================================================================
+// 📊 SERVIZI AGGIUNTIVI (opzionali per il futuro)
+// ================================================================================
+
+// ✅ NUOVO: Richiesta statistiche (per admin/monitoring)
+message RichiestaStatistiche {
+    string tipoStatistica = 1;      // "VENDITE", "OCCUPAZIONE", "RITARDI"
+    string dataInizio = 2;
+    string dataFine = 3;
+}
+
+message RispostaStatistiche {
+    string tipoStatistica = 1;
+    repeated StatisticaItem dati = 2;
+}
+
+message StatisticaItem {
+    string chiave = 1;              // Nome della metrica
+    double valore = 2;              // Valore numerico
+    string unita = 3;               // Unità di misura
+    string periodo = 4;             // Periodo di riferimento
+}
+
+// ================================================================================
+// 🔧 SERVIZI gRPC
+// ================================================================================
+
 service TrenicalService {
+    // Servizio principale per operazioni CRUD
     rpc inviaRichiesta(RichiestaGrpc) returns (RispostaGrpc);
+
+    // Streaming promozioni (già esistente, funziona bene)
     rpc streamPromozioni(RichiestaPromozioni) returns (stream PromozioneGrpc);
+
+    // Streaming notifiche tratte (migliorato)
     rpc streamNotificheTratta(IscrizioneNotificheGrpc) returns (stream NotificaTrattaGrpc);
+
+    // ✅ NUOVO: Servizi opzionali per il futuro
+    // rpc ottieniStatistiche(RichiestaStatistiche) returns (RispostaStatistiche);
+    // rpc verificaStatoSistema(google.protobuf.Empty) returns (StatoSistemaGrpc);
 }

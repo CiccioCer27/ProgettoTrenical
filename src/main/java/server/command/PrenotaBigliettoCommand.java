@@ -126,31 +126,56 @@ public class PrenotaBigliettoCommand implements ServerCommand {
      * ⏰ Avvia timer per rimuovere prenotazione dopo 10 minuti
      */
     private void avviaTimerScadenza(Biglietto prenotazione) {
-        System.out.println("⏰ DEBUG: Timer scadenza avviato per " +
+        System.out.println("⏰ DEBUG: Timer scadenza COMPLETO avviato per " +
                 prenotazione.getId().toString().substring(0, 8));
 
         new Thread(() -> {
             try {
                 Thread.sleep(600000); // 10 minuti
 
+                // ✅ VERIFICA che prenotazione esista ancora
                 Biglietto biglietto = memoriaBiglietti.getById(prenotazione.getId());
                 if (biglietto != null && "prenotazione".equals(biglietto.getTipoAcquisto())) {
-                    boolean rimosso = memoriaBiglietti.rimuoviBiglietto(prenotazione.getId());
-                    if (rimosso) {
-                        System.out.println("⏰ SCADENZA: Prenotazione rimossa " +
-                                prenotazione.getId().toString().substring(0, 8));
 
-                        // ✅ RIMUOVI anche dalle notifiche quando scade
-                        // Nota: Non rimuoviamo dalle notifiche per ora,
-                        // il cliente potrebbe voler essere informato su modifiche future
+                    System.out.println("⏰ SCADENZA: Rimuovendo prenotazione scaduta " +
+                            prenotazione.getId().toString().substring(0, 8) + "...");
+
+                    // 🗑️ STEP 1: Rimuovi biglietto dalla memoria
+                    boolean rimossoDaMemoria = memoriaBiglietti.rimuoviBiglietto(prenotazione.getId());
+
+                    if (rimossoDaMemoria) {
+                        System.out.println("✅ Prenotazione rimossa dalla memoria biglietti");
+
+                        // 🗑️ STEP 2: ✅ NUOVO - Rimuovi anche dalle notifiche
+                        try {
+                            boolean rimossoDaNotifiche = memoriaOsservatori.rimuoviOsservatore(
+                                    prenotazione.getIdTratta(),
+                                    prenotazione.getIdCliente()
+                            );
+
+                            if (rimossoDaNotifiche) {
+                                System.out.println("📡 ✅ Cliente rimosso dalle notifiche tratta (prenotazione scaduta)");
+                            } else {
+                                System.out.println("⚠️ Cliente non era nelle notifiche (già rimosso?)");
+                            }
+
+                        } catch (Exception e) {
+                            System.err.println("❌ Errore rimozione notifiche scadenza: " + e.getMessage());
+                        }
+
+                        System.out.println("🧹 ✅ CLEANUP SCADENZA COMPLETO: Prenotazione + Notifiche rimosse");
+
+                    } else {
+                        System.out.println("⚠️ Prenotazione non trovata in memoria per rimozione");
                     }
+
                 } else {
-                    System.out.println("✅ Prenotazione già confermata o rimossa");
+                    System.out.println("✅ Prenotazione " + prenotazione.getId().toString().substring(0, 8) +
+                            "... già confermata o rimossa, timer annullato");
                 }
 
             } catch (InterruptedException e) {
-                System.out.println("⚠️ Timer scadenza interrotto");
+                System.out.println("⚠️ Timer scadenza COMPLETO interrotto");
             }
         }).start();
-    }
-}
+    }}

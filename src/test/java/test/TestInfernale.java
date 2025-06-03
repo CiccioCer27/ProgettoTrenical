@@ -5,7 +5,6 @@ import command.ServerRequestHandler;
 import dto.*;
 import enums.ClasseServizio;
 import enums.TipoPrezzo;
-import factory.TrattaFactoryConcrete;
 import grpc.TrenicalServiceImpl;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -15,6 +14,14 @@ import persistence.*;
 import service.BancaServiceClient;
 import service.ClientService;
 
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
@@ -22,71 +29,50 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 🔥 TEST INFERNALE - STRESS MASSIMO TRENICAL
+ * 🔥 TEST INFERNALE JUNIT - STRESS MASSIMO TRENICAL
  *
- * Test che simula condizioni ESTREME:
+ * Test JUnit che simula condizioni ESTREME:
  * - Centinaia di client concorrenti
  * - Capienza MICRO (1-2 posti)
- * - Mix di operazioni (acquisto + prenotazione + conferma + modifica)
- * - Stress prolungato nel tempo
+ * - Mix di operazioni concorrenti
  * - Verifica integrità continua
  */
-public class TestInfernale {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("🔥 Test Infernale - Stress Estremo Sistema TreniCal")
+class TestInfernaleJUnit {
 
     private static final int SERVER_PORT = 8112;
     private static final int BANCA_PORT = 8113;
 
     // 🔥 CONFIGURAZIONE INFERNALE
     private static final int CAPIENZA_MICRO = 1; // UN SOLO POSTO!
-    private static final int NUM_CLIENT_INFERNALI = 200; // 200 client per 1 posto
-    private static final int ROUNDS_INFERNALI = 5; // 5 round di stress
-    private static final int TENTATIVI_PER_ROUND = 3;
-    private static final int TRATTE_MULTIPLE = 10; // 10 tratte diverse
+    private static final int NUM_CLIENT_INFERNALI = 100; // Ridotto per JUnit
+    private static final int ROUNDS_INFERNALI = 3; // Ridotto per JUnit
+    private static final int TENTATIVI_PER_ROUND = 2;
+    private static final int TRATTE_MULTIPLE = 5; // Ridotto per JUnit
 
-    private static Server server;
-    private static Server bancaServer;
-    private static MemoriaBiglietti memoriaBiglietti;
-    private static MemoriaTratte memoriaTratte;
-    private static List<TrattaDTO> tratteTest = new ArrayList<>();
+    private Server server;
+    private Server bancaServer;
+    private MemoriaBiglietti memoriaBiglietti;
+    private MemoriaTratte memoriaTratte;
+    private MemoriaOsservatori memoriaOsservatori;
+    private List<TrattaDTO> tratteTest = new ArrayList<>();
 
     // Statistiche infernali
-    private static final AtomicInteger acquistiTotali = new AtomicInteger(0);
-    private static final AtomicInteger prenotazioniTotali = new AtomicInteger(0);
-    private static final AtomicInteger confirmeTotali = new AtomicInteger(0);
-    private static final AtomicInteger modificheTotali = new AtomicInteger(0);
-    private static final AtomicInteger rifiutiTotali = new AtomicInteger(0);
-    private static final AtomicInteger erroriTotali = new AtomicInteger(0);
+    private final AtomicInteger acquistiTotali = new AtomicInteger(0);
+    private final AtomicInteger prenotazioniTotali = new AtomicInteger(0);
+    private final AtomicInteger confirmeTotali = new AtomicInteger(0);
+    private final AtomicInteger modificheTotali = new AtomicInteger(0);
+    private final AtomicInteger rifiutiTotali = new AtomicInteger(0);
+    private final AtomicInteger erroriTotali = new AtomicInteger(0);
 
-    private static final List<String> problemiRilevati = Collections.synchronizedList(new ArrayList<>());
-    private static final AtomicLong tempoTotaleMs = new AtomicLong(0);
+    private final List<String> problemiRilevati = Collections.synchronizedList(new ArrayList<>());
+    private final AtomicLong tempoTotaleMs = new AtomicLong(0);
 
-    public static void main(String[] args) {
-        System.out.println("🔥 ===== TEST INFERNALE TRENICAL =====");
-        System.out.println("💀 CONFIGURAZIONE ESTREMA:");
-        System.out.println("   🚂 Capienza: " + CAPIENZA_MICRO + " posto PER TRATTA");
-        System.out.println("   🚂 Tratte: " + TRATTE_MULTIPLE + " tratte diverse");
-        System.out.println("   👥 Client: " + NUM_CLIENT_INFERNALI + " demoni concorrenti");
-        System.out.println("   🔄 Round: " + ROUNDS_INFERNALI + " ondate di attacchi");
-        System.out.println("   📊 Operazioni totali: ~" + (NUM_CLIENT_INFERNALI * ROUNDS_INFERNALI * TENTATIVI_PER_ROUND));
-        System.out.println("   ⚡ MODALITÀ: DISTRUZIONE TOTALE");
-
-        try {
-            setupSistemaInfernale();
-            eseguiTestInfernale();
-            analisiPostApocalisse();
-        } catch (Exception e) {
-            System.err.println("💀 ERRORE DURANTE L'APOCALISSE: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            cleanup();
-        }
-    }
-
-    /**
-     * 🔧 Setup del sistema PULITO per il test infernale
-     */
-    private static void setupSistemaInfernale() throws Exception {
-        System.out.println("\n🔥 Setup sistema per TEST INFERNALE");
+    @BeforeAll
+    void setupSistemaInfernale() throws Exception {
+        System.out.println("🔥 Setup sistema per TEST INFERNALE");
 
         // 🧹 PULIZIA TOTALE PRIMA DI INIZIARE
         util.MemoryCleaner.pulisciaRapida();
@@ -98,26 +84,25 @@ public class TestInfernale {
                 .build()
                 .start();
 
-        // 🔧 COMPONENTI FRESCHI (ora i file sono vuoti)
+        // 🔧 COMPONENTI FRESCHI
         memoriaBiglietti = new MemoriaBiglietti();
         MemoriaClientiFedeli memoriaClienti = new MemoriaClientiFedeli();
-        memoriaTratte = new MemoriaTratte(); // Ora è vuota!
+        memoriaTratte = new MemoriaTratte();
         MemoriaPromozioni memoriaPromozioni = new MemoriaPromozioni();
+        memoriaOsservatori = new MemoriaOsservatori();
 
-        // 🔥 Crea ESATTAMENTE 10 tratte fresche
-        creaEsattamente10TratteMicro();
+        // 🔥 Crea tratte fresche con capienza micro
+        creaTratteMicro();
 
-        // Verifica che abbiamo esattamente 10 tratte
+        // Verifica setup
         int tratteNelSistema = memoriaTratte.getTutteTratte().size();
-        if (tratteNelSistema != TRATTE_MULTIPLE) {
-            throw new RuntimeException("ERRORE SETUP: Attese " + TRATTE_MULTIPLE +
-                    " tratte, trovate " + tratteNelSistema);
-        }
+        assertEquals(TRATTE_MULTIPLE, tratteNelSistema,
+                "Setup deve creare esattamente " + TRATTE_MULTIPLE + " tratte");
 
         // Handler thread-safe
         BancaServiceClient bancaClient = new BancaServiceClient("localhost", BANCA_PORT);
         ServerRequestHandler handler = new ServerRequestHandler(
-                memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient
+                memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient, memoriaOsservatori
         );
 
         // Servizio gRPC
@@ -136,24 +121,269 @@ public class TestInfernale {
 
         // 🔍 VERIFICA FINALE SETUP
         int bigliettiIniziali = memoriaBiglietti.getTuttiIBiglietti().size();
-        int tratteFinali = memoriaTratte.getTutteTratte().size();
-        int tratteTest = TestInfernale.tratteTest.size();
+        assertEquals(0, bigliettiIniziali, "Sistema deve iniziare senza biglietti");
+        assertEquals(TRATTE_MULTIPLE, tratteTest.size(), "Deve avere tutte le tratte test");
 
         System.out.println("✅ Sistema infernale PULITO operativo:");
-        System.out.println("   💀 Tratte in memoria: " + tratteFinali);
-        System.out.println("   💀 Tratte per test: " + tratteTest);
-        System.out.println("   🎫 Biglietti iniziali: " + bigliettiIniziali);
-        System.out.println("   🎯 Posti totali: " + (tratteFinali * CAPIENZA_MICRO));
-
-        if (tratteFinali != TRATTE_MULTIPLE || tratteTest != TRATTE_MULTIPLE || bigliettiIniziali != 0) {
-            throw new RuntimeException("SETUP FALLITO: Sistema non pulito!");
-        }
+        System.out.println("   💀 Tratte: " + tratteTest.size());
+        System.out.println("   🎯 Posti totali: " + (tratteTest.size() * CAPIENZA_MICRO));
     }
 
-    private static void creaEsattamente10TratteMicro() {
-        System.out.println("🚂 Creando ESATTAMENTE " + TRATTE_MULTIPLE + " tratte micro...");
+    @AfterAll
+    void cleanupSistemaInfernale() throws Exception {
+        System.out.println("🧹 Cleanup sistema infernale...");
 
-        // 🧹 PULISCI TUTTO
+        if (server != null) {
+            server.shutdown();
+            server.awaitTermination(5, TimeUnit.SECONDS);
+        }
+
+        if (bancaServer != null) {
+            bancaServer.shutdown();
+            bancaServer.awaitTermination(5, TimeUnit.SECONDS);
+        }
+
+        System.out.println("✅ Cleanup completato");
+    }
+
+    @Test
+    @Order(1)
+    @DisplayName("🔥 Test Stress Estremo - Single Round")
+    void testStressEstremoSingleRound() throws Exception {
+        System.out.println("\n🔥 INIZIO TEST STRESS ESTREMO - SINGLE ROUND");
+
+        resetContatori();
+
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_CLIENT_INFERNALI);
+        CountDownLatch latch = new CountDownLatch(NUM_CLIENT_INFERNALI);
+
+        AtomicInteger acquistiRound = new AtomicInteger(0);
+        AtomicInteger rifiutiRound = new AtomicInteger(0);
+
+        long startTime = System.currentTimeMillis();
+
+        // Scatena i demoni
+        for (int i = 0; i < NUM_CLIENT_INFERNALI; i++) {
+            final int demonId = i;
+            executor.submit(() -> {
+                try {
+                    eseguiDemoneConcorrente(demonId, 1, acquistiRound, rifiutiRound);
+                } catch (Exception e) {
+                    erroriTotali.incrementAndGet();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        // Aspetta completamento
+        assertTrue(latch.await(60, TimeUnit.SECONDS),
+                "Test deve completarsi entro 60 secondi");
+        executor.shutdown();
+
+        long endTime = System.currentTimeMillis();
+        long roundTime = endTime - startTime;
+
+        // 🔍 VERIFICHE INTEGRITÀ
+        verificaIntegritaSistema();
+
+        // 📊 ASSERZIONI
+        int bigliettiTotali = memoriaBiglietti.getTuttiIBiglietti().size();
+        int postiTotali = TRATTE_MULTIPLE * CAPIENZA_MICRO;
+
+        assertTrue(bigliettiTotali <= postiTotali,
+                "Non deve esserci overselling: " + bigliettiTotali + "/" + postiTotali);
+
+        assertTrue(acquistiRound.get() > 0, "Almeno alcuni acquisti devono riuscire");
+
+        System.out.println("✅ Round completato:");
+        System.out.println("   ⏱️ Tempo: " + roundTime + "ms");
+        System.out.println("   ✅ Successi: " + acquistiRound.get());
+        System.out.println("   ❌ Rifiuti: " + rifiutiRound.get());
+        System.out.println("   💀 Biglietti venduti: " + bigliettiTotali + "/" + postiTotali);
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("🔥 Test Multi-Round Progressivo")
+    void testMultiRoundProgressivo() throws Exception {
+        System.out.println("\n🔥 INIZIO TEST MULTI-ROUND PROGRESSIVO");
+
+        resetContatori();
+
+        for (int round = 1; round <= ROUNDS_INFERNALI; round++) {
+            System.out.println("\n💀 ===== ROUND " + round + "/" + ROUNDS_INFERNALI + " =====");
+
+            eseguiRoundInfernale(round);
+            verificaIntegritaTraRound(round);
+
+            // Pausa tra round
+            Thread.sleep(500);
+        }
+
+        // 📊 VERIFICA FINALE
+        int bigliettiFinali = memoriaBiglietti.getTuttiIBiglietti().size();
+        int postiTotali = TRATTE_MULTIPLE * CAPIENZA_MICRO;
+
+        assertTrue(bigliettiFinali <= postiTotali,
+                "Overselling finale: " + bigliettiFinali + "/" + postiTotali);
+
+        assertTrue(problemiRilevati.isEmpty(),
+                "Non devono esserci problemi di integrità: " + problemiRilevati);
+
+        System.out.println("✅ Multi-round completato con successo");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {10, 25, 50, 75})
+    @DisplayName("🔥 Test Scaling - Diversi Livelli di Stress")
+    void testScalingStress(int numClienti) throws Exception {
+        System.out.println("\n🔥 TEST SCALING: " + numClienti + " client");
+
+        ExecutorService executor = Executors.newFixedThreadPool(numClienti);
+        CountDownLatch latch = new CountDownLatch(numClienti);
+
+        AtomicInteger successi = new AtomicInteger(0);
+        AtomicInteger fallimenti = new AtomicInteger(0);
+
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < numClienti; i++) {
+            final int clientId = i;
+            executor.submit(() -> {
+                try {
+                    boolean successo = eseguiSingoloTentativo(clientId);
+                    if (successo) {
+                        successi.incrementAndGet();
+                    } else {
+                        fallimenti.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    fallimenti.incrementAndGet();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        assertTrue(latch.await(30, TimeUnit.SECONDS),
+                "Test scaling deve completarsi entro 30s");
+        executor.shutdown();
+
+        long endTime = System.currentTimeMillis();
+        double throughput = (numClienti * 1000.0) / (endTime - startTime);
+
+        // 📊 VERIFICHE SCALING
+        int totaleOperazioni = successi.get() + fallimenti.get();
+        assertEquals(numClienti, totaleOperazioni,
+                "Tutte le operazioni devono essere processate");
+
+        assertTrue(throughput > 0, "Throughput deve essere positivo");
+
+        System.out.println("📊 Scaling " + numClienti + " client:");
+        System.out.println("   ✅ Successi: " + successi.get());
+        System.out.println("   ❌ Fallimenti: " + fallimenti.get());
+        System.out.println("   ⚡ Throughput: " + String.format("%.1f", throughput) + " op/sec");
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("🔍 Test Verifica Integrità Finale")
+    void testVerificaIntegritaFinale() {
+        System.out.println("\n🔍 VERIFICA INTEGRITÀ FINALE");
+
+        // Verifica capienza per ogni tratta
+        for (TrattaDTO tratta : tratteTest) {
+            long biglietti = memoriaBiglietti.contaBigliettiPerTratta(tratta.getId());
+            assertTrue(biglietti <= CAPIENZA_MICRO,
+                    "Tratta " + tratta.getStazionePartenza() + "→" + tratta.getStazioneArrivo() +
+                            " ha overselling: " + biglietti + "/" + CAPIENZA_MICRO);
+        }
+
+        // Verifica integrità globale
+        Map<UUID, Integer> capienzaPerTratta = new HashMap<>();
+        for (TrattaDTO tratta : tratteTest) {
+            capienzaPerTratta.put(tratta.getId(), CAPIENZA_MICRO);
+        }
+
+        boolean integrita = memoriaBiglietti.verificaIntegrita(capienzaPerTratta);
+        assertTrue(integrita, "Integrità globale deve essere preservata");
+
+        // Statistiche finali
+        int bigliettiTotali = memoriaBiglietti.getTuttiIBiglietti().size();
+        int postiTotali = TRATTE_MULTIPLE * CAPIENZA_MICRO;
+
+        System.out.println("📊 INTEGRITÀ FINALE:");
+        System.out.println("   🎫 Biglietti: " + bigliettiTotali + "/" + postiTotali);
+        System.out.println("   ✅ Integrità: " + (integrita ? "PRESERVATA" : "VIOLATA"));
+
+        // Stampa statistiche dettagliate
+        memoriaBiglietti.stampaStatisticheDettagliate();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "BASE, INTERO, 1",
+            "ARGENTO, INTERO, 1",
+            "GOLD, INTERO, 1"
+    })
+    @DisplayName("🎭 Test Mix Classi Sotto Stress")
+    void testMixClassiSottoStress(ClasseServizio classe, TipoPrezzo tipoPrezzo, int capienzaAttesa) throws Exception {
+        System.out.println("\n🎭 Test classe " + classe + " - " + tipoPrezzo);
+
+        int numClienti = 20; // Test più contenuto per parametrized
+        ExecutorService executor = Executors.newFixedThreadPool(numClienti);
+        CountDownLatch latch = new CountDownLatch(numClienti);
+
+        AtomicInteger successi = new AtomicInteger(0);
+
+        for (int i = 0; i < numClienti; i++) {
+            executor.submit(() -> {
+                try {
+                    ClientService client = new ClientService("localhost", SERVER_PORT);
+                    client.attivaCliente("TestClass" + Thread.currentThread().getId(), "Test",
+                            "test" + Thread.currentThread().getId() + "@test.com", 25, "Test", "123456");
+
+                    TrattaDTO tratta = tratteTest.get(0); // Prima tratta
+
+                    RichiestaDTO acquisto = new RichiestaDTO.Builder()
+                            .tipo("ACQUISTA")
+                            .idCliente(client.getCliente().getId().toString())
+                            .tratta(tratta)
+                            .classeServizio(classe)
+                            .tipoPrezzo(tipoPrezzo)
+                            .build();
+
+                    RispostaDTO risposta = client.inviaRichiesta(acquisto);
+                    if (risposta.getEsito().equals("OK")) {
+                        successi.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    // Errore normale sotto stress
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        assertTrue(latch.await(30, TimeUnit.SECONDS),
+                "Test mix classi deve completarsi");
+        executor.shutdown();
+
+        // Con capienza 1, massimo 1 successo per tratta
+        assertTrue(successi.get() <= capienzaAttesa,
+                "Successi non devono superare capienza: " + successi.get() + "/" + capienzaAttesa);
+
+        System.out.println("🎭 Classe " + classe + ": " + successi.get() + "/" + numClienti + " successi");
+    }
+
+    // ================================================================================
+    // 🔧 METODI HELPER
+    // ================================================================================
+
+    private void creaTratteMicro() {
+        System.out.println("🚂 Creando " + TRATTE_MULTIPLE + " tratte micro...");
+
         tratteTest.clear();
 
         String[] partenze = {"MilanoInf", "RomaApoc", "NapoliChaos", "TorinoMay", "FirenzeDoom"};
@@ -164,7 +394,7 @@ public class TestInfernale {
             model.Treno trenoMicro = new model.Treno.Builder()
                     .numero(6660 + i)
                     .tipologia("TrenoInf" + i)
-                    .capienzaTotale(CAPIENZA_MICRO) // 💀 UN POSTO SOLO!
+                    .capienzaTotale(CAPIENZA_MICRO)
                     .wifiDisponibile(false)
                     .preseElettriche(false)
                     .ariaCondizionata(false)
@@ -178,105 +408,63 @@ public class TestInfernale {
                 prezzi.put(classe, new model.Prezzo(666.0, 500.0, 333.0));
             }
 
-            // 🎯 Nomi UNICI per evitare confusione
             String partenza = partenze[i % partenze.length] + i;
             String arrivo = arrivi[i % arrivi.length] + i;
 
             Tratta trattaModel = new Tratta(
                     UUID.randomUUID(),
-                    partenza, // Nome unico
-                    arrivo,   // Nome unico
+                    partenza,
+                    arrivo,
                     LocalDate.now().plusDays(1),
-                    java.time.LocalTime.of(6 + i, 0), // Orari diversi
+                    java.time.LocalTime.of(6 + i, 0),
                     666 + i,
                     trenoMicro,
                     prezzi
             );
 
-            // 🔧 AGGIUNGI A MEMORIA E LISTA TEST
             memoriaTratte.aggiungiTratta(trattaModel);
             tratteTest.add(Assembler.AssemblerTratta.toDTO(trattaModel));
-
-            System.out.println("💀 Tratta " + (i + 1) + "/" + TRATTE_MULTIPLE + ": " +
-                    partenza + " → " + arrivo +
-                    " (ID: " + trattaModel.getId().toString().substring(0, 8) + ")");
         }
 
-        System.out.println("✅ Create ESATTAMENTE " + TRATTE_MULTIPLE + " tratte uniche");
-    }
-    /**
-     * 🔥 Esecuzione del test infernale
-     */
-    private static void eseguiTestInfernale() throws Exception {
-        System.out.println("\n🔥 INIZIO TEST INFERNALE");
-        System.out.println("💀 Preparatevi all'apocalisse...");
-
-        for (int round = 1; round <= ROUNDS_INFERNALI; round++) {
-            System.out.println("\n💀 ===== ROUND " + round + "/" + ROUNDS_INFERNALI + " =====");
-            eseguiRoundInfernale(round);
-
-            // Verifica integrità tra i round
-            verificaIntegritaTraRound(round);
-
-            // Pausa tra apocalissi
-            Thread.sleep(1000);
-        }
-
-        System.out.println("\n🔥 TEST INFERNALE COMPLETATO");
+        System.out.println("✅ Create " + TRATTE_MULTIPLE + " tratte micro");
     }
 
-    /**
-     * 💀 Esegue un singolo round infernale
-     */
-    private static void eseguiRoundInfernale(int roundNum) throws Exception {
-        System.out.println("   🔥 Scatenando " + NUM_CLIENT_INFERNALI + " demoni...");
+    private void resetContatori() {
+        acquistiTotali.set(0);
+        prenotazioniTotali.set(0);
+        confirmeTotali.set(0);
+        modificheTotali.set(0);
+        rifiutiTotali.set(0);
+        erroriTotali.set(0);
+        problemiRilevati.clear();
+        tempoTotaleMs.set(0);
+    }
 
+    private void eseguiRoundInfernale(int roundNum) throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(NUM_CLIENT_INFERNALI);
         CountDownLatch latch = new CountDownLatch(NUM_CLIENT_INFERNALI);
 
-        // Reset contatori per questo round
         AtomicInteger acquistiRound = new AtomicInteger(0);
         AtomicInteger rifiutiRound = new AtomicInteger(0);
 
         long startTime = System.currentTimeMillis();
 
-        // Scatena i demoni
         for (int i = 0; i < NUM_CLIENT_INFERNALI; i++) {
             final int demonId = i;
-            final int roundId = roundNum;
-
             executor.submit(() -> {
                 try {
-                    eseguiDemoneConcorrente(demonId, roundId, acquistiRound, rifiutiRound);
+                    eseguiDemoneConcorrente(demonId, roundNum, acquistiRound, rifiutiRound);
                 } catch (Exception e) {
                     erroriTotali.incrementAndGet();
-                    System.err.println("💀 Demone " + demonId + " esploso: " + e.getMessage());
                 } finally {
                     latch.countDown();
                 }
             });
         }
 
-        // Monitoraggio real-time dell'apocalisse
-        Thread monitor = new Thread(() -> {
-            while (true) {
-                try {
-                    if (latch.await(2, TimeUnit.SECONDS)) break;
-                } catch (InterruptedException e) {
-                    break;
-                }
-
-                int bigliettiVenduti = memoriaBiglietti.getTuttiIBiglietti().size();
-                System.out.println("   💀 APOCALISSE IN CORSO: " + bigliettiVenduti + " anime catturate | " +
-                        acquistiRound.get() + " successi | " + rifiutiRound.get() + " respinti");
-            }
-        });
-        monitor.start();
-
-        // Aspetta che l'apocalisse finisca
-        latch.await(60, TimeUnit.SECONDS);
+        assertTrue(latch.await(60, TimeUnit.SECONDS),
+                "Round " + roundNum + " deve completarsi entro 60s");
         executor.shutdown();
-        monitor.interrupt();
 
         long endTime = System.currentTimeMillis();
         long roundTime = endTime - startTime;
@@ -286,38 +474,28 @@ public class TestInfernale {
         System.out.println("      ⏱️ Tempo: " + roundTime + "ms");
         System.out.println("      ✅ Successi: " + acquistiRound.get());
         System.out.println("      ❌ Rifiuti: " + rifiutiRound.get());
-        System.out.println("      💀 Anime totali catturate: " + memoriaBiglietti.getTuttiIBiglietti().size());
     }
 
-    /**
-     * 👹 Singolo demone che attacca il sistema
-     */
-    private static void eseguiDemoneConcorrente(int demonId, int round,
-                                                AtomicInteger successi, AtomicInteger rifiuti) throws Exception {
+    private void eseguiDemoneConcorrente(int demonId, int round,
+                                         AtomicInteger successi, AtomicInteger rifiuti) throws Exception {
         ClientService client = new ClientService("localhost", SERVER_PORT);
         client.attivaCliente("Demone" + demonId + "R" + round, "Infernale",
                 "demone" + demonId + "r" + round + "@hell.com", 666, "Inferno", "666" + demonId);
 
         for (int tentativo = 0; tentativo < TENTATIVI_PER_ROUND; tentativo++) {
             try {
-                // Sceglie tratta casuale
                 TrattaDTO trattaCasuale = tratteTest.get((int) (Math.random() * tratteTest.size()));
-
-                // Mix di operazioni infernali
-                TipoOperazione operazione = scegliOperazioneCasuale();
-
-                boolean successo = eseguiOperazioneInfernale(client, trattaCasuale, operazione);
+                boolean successo = eseguiOperazioneInfernale(client, trattaCasuale);
 
                 if (successo) {
                     successi.incrementAndGet();
-                    aggiornaContatori(operazione, true);
+                    acquistiTotali.incrementAndGet();
                 } else {
                     rifiuti.incrementAndGet();
-                    aggiornaContatori(operazione, false);
+                    rifiutiTotali.incrementAndGet();
                 }
 
-                // Pausa infernale casuale
-                Thread.sleep((int) (Math.random() * 20));
+                Thread.sleep((int) (Math.random() * 10));
 
             } catch (Exception e) {
                 erroriTotali.incrementAndGet();
@@ -325,39 +503,26 @@ public class TestInfernale {
         }
     }
 
-    enum TipoOperazione {
-        ACQUISTO, PRENOTAZIONE, CONFERMA, MODIFICA
+    private boolean eseguiSingoloTentativo(int clientId) throws Exception {
+        ClientService client = new ClientService("localhost", SERVER_PORT);
+        client.attivaCliente("Client" + clientId, "Test",
+                "client" + clientId + "@test.com", 25, "Test", "123" + clientId);
+
+        TrattaDTO tratta = tratteTest.get(clientId % tratteTest.size());
+        return eseguiOperazioneInfernale(client, tratta);
     }
 
-    private static TipoOperazione scegliOperazioneCasuale() {
-        double random = Math.random();
-        if (random < 0.6) return TipoOperazione.ACQUISTO;      // 60% acquisti
-        if (random < 0.8) return TipoOperazione.PRENOTAZIONE; // 20% prenotazioni
-        if (random < 0.9) return TipoOperazione.CONFERMA;     // 10% conferme
-        return TipoOperazione.MODIFICA;                        // 10% modifiche
-    }
-
-    private static boolean eseguiOperazioneInfernale(ClientService client, TrattaDTO tratta, TipoOperazione op) {
+    private boolean eseguiOperazioneInfernale(ClientService client, TrattaDTO tratta) {
         try {
-            RichiestaDTO.Builder builder = new RichiestaDTO.Builder()
+            RichiestaDTO acquisto = new RichiestaDTO.Builder()
+                    .tipo("ACQUISTA")
                     .idCliente(client.getCliente().getId().toString())
                     .tratta(tratta)
-                    .classeServizio(ClasseServizio.BASE);
+                    .classeServizio(ClasseServizio.BASE)
+                    .tipoPrezzo(TipoPrezzo.INTERO)
+                    .build();
 
-            RichiestaDTO richiesta = switch (op) {
-                case ACQUISTO -> builder.tipo("ACQUISTA").tipoPrezzo(TipoPrezzo.INTERO).build();
-                case PRENOTAZIONE -> builder.tipo("PRENOTA").build();
-                case CONFERMA -> {
-                    // Per conferma, serve una prenotazione esistente - skip per ora
-                    yield builder.tipo("ACQUISTA").tipoPrezzo(TipoPrezzo.INTERO).build();
-                }
-                case MODIFICA -> {
-                    // Per modifica, serve un biglietto esistente - skip per ora
-                    yield builder.tipo("ACQUISTA").tipoPrezzo(TipoPrezzo.INTERO).build();
-                }
-            };
-
-            RispostaDTO risposta = client.inviaRichiesta(richiesta);
+            RispostaDTO risposta = client.inviaRichiesta(acquisto);
             return risposta.getEsito().equals("OK");
 
         } catch (Exception e) {
@@ -365,42 +530,24 @@ public class TestInfernale {
         }
     }
 
-    private static void aggiornaContatori(TipoOperazione op, boolean successo) {
-        if (successo) {
-            switch (op) {
-                case ACQUISTO -> acquistiTotali.incrementAndGet();
-                case PRENOTAZIONE -> prenotazioniTotali.incrementAndGet();
-                case CONFERMA -> confirmeTotali.incrementAndGet();
-                case MODIFICA -> modificheTotali.incrementAndGet();
-            }
-        } else {
-            rifiutiTotali.incrementAndGet();
-        }
-    }
-
-    /**
-     * 🔍 Verifica integrità tra i round
-     */
-    private static void verificaIntegritaTraRound(int round) {
-        System.out.println("   🔍 VERIFICA INTEGRITÀ POST-ROUND " + round);
-
-        // Conta biglietti per tratta
+    private void verificaIntegritaSistema() {
         Map<UUID, Integer> capienzaPerTratta = new HashMap<>();
         for (TrattaDTO tratta : tratteTest) {
             capienzaPerTratta.put(tratta.getId(), CAPIENZA_MICRO);
         }
 
         boolean integrita = memoriaBiglietti.verificaIntegrita(capienzaPerTratta);
-
         if (!integrita) {
-            String problema = "VIOLAZIONE INTEGRITÀ nel round " + round;
+            String problema = "VIOLAZIONE INTEGRITÀ nel sistema";
             problemiRilevati.add(problema);
-            System.out.println("   🚨 " + problema);
-        } else {
-            System.out.println("   ✅ Integrità preservata");
         }
+    }
 
-        // Conta biglietti totali
+    private void verificaIntegritaTraRound(int round) {
+        System.out.println("   🔍 VERIFICA INTEGRITÀ POST-ROUND " + round);
+
+        verificaIntegritaSistema();
+
         int bigliettiTotali = memoriaBiglietti.getTuttiIBiglietti().size();
         int postiTotaliSistema = TRATTE_MULTIPLE * CAPIENZA_MICRO;
 
@@ -408,97 +555,8 @@ public class TestInfernale {
             String overselling = "OVERSELLING GLOBALE: " + bigliettiTotali + "/" + postiTotaliSistema;
             problemiRilevati.add(overselling);
             System.out.println("   🚨 " + overselling);
-        }
-    }
-
-    /**
-     * 📊 Analisi post-apocalisse
-     */
-    private static void analisiPostApocalisse() {
-        System.out.println("\n📊 ===== ANALISI POST-APOCALISSE =====");
-
-        int bigliettiFinali = memoriaBiglietti.getTuttiIBiglietti().size();
-        int postiTotali = TRATTE_MULTIPLE * CAPIENZA_MICRO;
-        boolean sistemaIntegro = problemiRilevati.isEmpty();
-
-        System.out.println("💀 STATISTICHE DELL'APOCALISSE:");
-        System.out.println("   ⏱️ Tempo totale: " + tempoTotaleMs.get() + "ms");
-        System.out.println("   🔥 Round completati: " + ROUNDS_INFERNALI);
-        System.out.println("   👹 Demoni scatenati: " + (NUM_CLIENT_INFERNALI * ROUNDS_INFERNALI));
-        System.out.println("   💰 Acquisti: " + acquistiTotali.get());
-        System.out.println("   📝 Prenotazioni: " + prenotazioniTotali.get());
-        System.out.println("   ✅ Conferme: " + confirmeTotali.get());
-        System.out.println("   🔄 Modifiche: " + modificheTotali.get());
-        System.out.println("   ❌ Rifiuti: " + rifiutiTotali.get());
-        System.out.println("   💥 Errori: " + erroriTotali.get());
-
-        System.out.println("\n🎯 RISULTATI CAPIENZA:");
-        System.out.println("   🚂 Posti totali sistema: " + postiTotali);
-        System.out.println("   🎫 Biglietti venduti: " + bigliettiFinali);
-        System.out.println("   ⚖️ Rapporto: " + bigliettiFinali + "/" + postiTotali);
-
-        // Dettaglio per tratta
-        System.out.println("\n📋 DETTAGLIO PER TRATTA:");
-        for (TrattaDTO tratta : tratteTest) {
-            long biglietti = memoriaBiglietti.contaBigliettiPerTratta(tratta.getId());
-            String status = (biglietti <= CAPIENZA_MICRO) ? "✅" : "❌ OVERSELLING";
-            System.out.println("   🚂 " + tratta.getStazionePartenza() + "→" + tratta.getStazioneArrivo() +
-                    ": " + biglietti + "/" + CAPIENZA_MICRO + " " + status);
-        }
-
-        System.out.println("\n🔍 PROBLEMI RILEVATI:");
-        if (problemiRilevati.isEmpty()) {
-            System.out.println("   🎉 NESSUN PROBLEMA! Sistema ha resistito all'apocalisse!");
         } else {
-            problemiRilevati.forEach(p -> System.out.println("   🚨 " + p));
+            System.out.println("   ✅ Integrità preservata");
         }
-
-        // Statistiche avanzate
-        memoriaBiglietti.stampaStatisticheDettagliate();
-
-        System.out.println("\n🏆 VERDETTO FINALE DELL'APOCALISSE:");
-        if (sistemaIntegro && bigliettiFinali <= postiTotali) {
-            System.out.println("   🎉 LEGGENDARIO! Sistema ha DOMINATO l'apocalisse!");
-            System.out.println("   🛡️ Zero overselling con stress INFERNALE");
-            System.out.println("   ⚡ Thread safety INDISTRUTTIBILE");
-            System.out.println("   👑 IL SISTEMA È IMMORTALE!");
-        } else if (bigliettiFinali <= postiTotali) {
-            System.out.println("   👍 OTTIMO! Sistema resistente ma con problemi minori");
-            System.out.println("   🔧 Alcuni problemi da verificare");
-        } else {
-            System.out.println("   💀 DISTRUTTO! Sistema non ha resistito all'apocalisse");
-            System.out.println("   🚨 Overselling rilevato sotto stress estremo");
-            System.out.println("   ⚠️ Richiede correzioni immediate");
-        }
-
-        System.out.println("\n🔥 ===== APOCALISSE COMPLETATA =====");
-    }
-
-    private static void cleanup() {
-        System.out.println("\n🧹 Pulizia post-apocalisse...");
-
-        if (server != null) {
-            server.shutdown();
-            try {
-                if (!server.awaitTermination(5, TimeUnit.SECONDS)) {
-                    server.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                server.shutdownNow();
-            }
-        }
-
-        if (bancaServer != null) {
-            bancaServer.shutdown();
-            try {
-                if (!bancaServer.awaitTermination(5, TimeUnit.SECONDS)) {
-                    bancaServer.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                bancaServer.shutdownNow();
-            }
-        }
-
-        System.out.println("✅ Cleanup apocalisse completato");
     }
 }

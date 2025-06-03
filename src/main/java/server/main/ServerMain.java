@@ -45,7 +45,7 @@ public class ServerMain {
         MemoriaClientiFedeli memoriaClienti = new MemoriaClientiFedeli();
         MemoriaTratte memoriaTratte = new MemoriaTratte();
         MemoriaPromozioni memoriaPromozioni = new MemoriaPromozioni();
-        MemoriaOsservatori memoriaOsservatori=new MemoriaOsservatori();
+        MemoriaOsservatori memoriaOsservatori = new MemoriaOsservatori();
 
         System.out.println("💾 Componenti memoria caricate:");
         System.out.println("   🎫 Biglietti: " + memoriaBiglietti.getTuttiIBiglietti().size());
@@ -65,8 +65,9 @@ public class ServerMain {
 
         // 3️⃣ Client banca e handler
         BancaServiceClient bancaClient = new BancaServiceClient("localhost", BANCA_PORT);
+        // ✅ CORREZIONE: Rimossa parentesi extra
         ServerRequestHandler handler = new ServerRequestHandler(
-                memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient,memoriaOsservatori);
+                memoriaBiglietti, memoriaClienti, memoriaTratte, bancaClient, memoriaOsservatori
         );
 
         // 4️⃣ Dispatcher per notifiche gRPC
@@ -84,7 +85,8 @@ public class ServerMain {
         NotificaEventiListener notificaListener = new NotificaEventiListener(
                 notificaDispatcher,
                 memoriaTratte,
-                trenicalService  // ✅ INJECTION per broadcast promozioni!
+                memoriaBiglietti,  // ✅ AGGIUNTO: MemoriaBiglietti mancava
+                trenicalService   // ✅ INJECTION per broadcast promozioni!
         );
         ListaEventiS.getInstance().aggiungi(notificaListener);
 
