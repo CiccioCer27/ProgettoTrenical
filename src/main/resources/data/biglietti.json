@@ -1,1 +1,19 @@
-[]
+[ {
+  "id" : "c98837d8-f3d3-47a5-bbc0-c27cbc1ebcb7",
+  "idCliente" : "1b8f61ff-214f-42dc-b99c-f0540b2f8053",
+  "idTratta" : "a154caee-e920-48bc-8705-67a85715cd09",
+  "classe" : "BASE",
+  "conCartaFedelta" : false,
+  "prezzoPagato" : 26.205085540747724,
+  "dataAcquisto" : "2025-06-03",
+  "tipoAcquisto" : "acquisto"
+}, {
+  "id" : "87529ccc-50db-4260-a262-a336cb4d1826",
+  "idCliente" : "496fdde0-81cb-44af-9c34-061872c2b9bf",
+  "idTratta" : "f533ea60-7957-4d71-b1d6-31e486190b88",
+  "classe" : "BASE",
+  "conCartaFedelta" : false,
+  "prezzoPagato" : 29.8389635921245,
+  "dataAcquisto" : "2025-06-03",
+  "tipoAcquisto" : "modifica"
+} ]

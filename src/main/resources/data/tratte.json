@@ -1,184 +1,4 @@
 [ {
-  "id" : "b07cbcbf-c4d1-45e7-b331-9d3743d33726",
-  "stazionePartenza" : "ReggioCalabria",
-  "stazioneArrivo" : "Torino",
-  "data" : "2025-06-04",
-  "ora" : "21:00:00",
-  "binario" : 2,
-  "treno" : {
-    "id" : "880c13a1-f2a2-471b-8646-890dd7b06ded",
-    "numero" : 100,
-    "tipologia" : "Regionale",
-    "capienzaTotale" : 88,
-    "wifiDisponibile" : false,
-    "preseElettriche" : true,
-    "ariaCondizionata" : true,
-    "serviziRistorazione" : "Nessuno",
-    "accessibileDisabili" : true,
-    "nomeCommerciale" : "Regionale 100"
-  },
-  "prezzi" : {
-    "ARGENTO" : {
-      "intero" : 21.565919616982487,
-      "promozione" : 17.25273569358599,
-      "fedelta" : 12.939551770189492
-    },
-    "GOLD" : {
-      "intero" : 26.696089516401596,
-      "promozione" : 21.356871613121278,
-      "fedelta" : 16.017653709840957
-    },
-    "BASE" : {
-      "intero" : 26.459795661718225,
-      "promozione" : 21.167836529374583,
-      "fedelta" : 15.875877397030933
-    }
-  }
-}, {
-  "id" : "3ba33fcd-b1d7-4426-bb76-9ea2bcc1409c",
-  "stazionePartenza" : "Milano",
-  "stazioneArrivo" : "ReggioCalabria",
-  "data" : "2025-06-04",
-  "ora" : "18:00:00",
-  "binario" : 6,
-  "treno" : {
-    "id" : "7896c7ac-9d5d-498d-aaaf-9beba70586c1",
-    "numero" : 101,
-    "tipologia" : "Frecciarossa",
-    "capienzaTotale" : 84,
-    "wifiDisponibile" : true,
-    "preseElettriche" : false,
-    "ariaCondizionata" : true,
-    "serviziRistorazione" : "Nessuno",
-    "accessibileDisabili" : true,
-    "nomeCommerciale" : "Frecciarossa 101"
-  },
-  "prezzi" : {
-    "ARGENTO" : {
-      "intero" : 31.000481553655497,
-      "promozione" : 24.8003852429244,
-      "fedelta" : 18.600288932193298
-    },
-    "GOLD" : {
-      "intero" : 26.4002041466609,
-      "promozione" : 21.12016331732872,
-      "fedelta" : 15.84012248799654
-    },
-    "BASE" : {
-      "intero" : 34.214130958019965,
-      "promozione" : 27.371304766415975,
-      "fedelta" : 20.528478574811977
-    }
-  }
-}, {
-  "id" : "99de5a6e-36a5-40d5-9dcd-53d5ec1fd4ca",
-  "stazionePartenza" : "Strongoli",
-  "stazioneArrivo" : "Firenze",
-  "data" : "2025-06-04",
-  "ora" : "18:00:00",
-  "binario" : 2,
-  "treno" : {
-    "id" : "8d714939-2ae7-4a01-97e9-b75d64dbf9b4",
-    "numero" : 102,
-    "tipologia" : "Frecciarossa",
-    "capienzaTotale" : 92,
-    "wifiDisponibile" : false,
-    "preseElettriche" : true,
-    "ariaCondizionata" : true,
-    "serviziRistorazione" : "Snack, Bevande",
-    "accessibileDisabili" : true,
-    "nomeCommerciale" : "Frecciarossa 102"
-  },
-  "prezzi" : {
-    "ARGENTO" : {
-      "intero" : 48.59646767722725,
-      "promozione" : 38.87717414178181,
-      "fedelta" : 29.15788060633635
-    },
-    "GOLD" : {
-      "intero" : 52.51326246925435,
-      "promozione" : 42.01060997540348,
-      "fedelta" : 31.50795748155261
-    },
-    "BASE" : {
-      "intero" : 29.513751469598134,
-      "promozione" : 23.61100117567851,
-      "fedelta" : 17.70825088175888
-    }
-  }
-}, {
-  "id" : "4e747201-70b3-4f2a-923a-ee9c8c861170",
-  "stazionePartenza" : "Strongoli",
-  "stazioneArrivo" : "Milano",
-  "data" : "2025-06-04",
-  "ora" : "12:00:00",
-  "binario" : 10,
-  "treno" : {
-    "id" : "7731c479-c9d9-4a99-8673-4232c3a7e1bb",
-    "numero" : 103,
-    "tipologia" : "Regionale",
-    "capienzaTotale" : 96,
-    "wifiDisponibile" : true,
-    "preseElettriche" : true,
-    "ariaCondizionata" : true,
-    "serviziRistorazione" : "Nessuno",
-    "accessibileDisabili" : true,
-    "nomeCommerciale" : "Regionale 103"
-  },
-  "prezzi" : {
-    "ARGENTO" : {
-      "intero" : 34.79757571770996,
-      "promozione" : 27.83806057416797,
-      "fedelta" : 20.878545430625977
-    },
-    "GOLD" : {
-      "intero" : 48.06132538054562,
-      "promozione" : 38.4490603044365,
-      "fedelta" : 28.836795228327368
-    },
-    "BASE" : {
-      "intero" : 36.33298305157865,
-      "promozione" : 29.06638644126292,
-      "fedelta" : 21.79978983094719
-    }
-  }
-}, {
-  "id" : "a154caee-e920-48bc-8705-67a85715cd09",
-  "stazionePartenza" : "Torino",
-  "stazioneArrivo" : "Strongoli",
-  "data" : "2025-06-04",
-  "ora" : "20:00:00",
-  "binario" : 10,
-  "treno" : {
-    "id" : "a2f1139c-7ef9-4147-9eb5-0b4bb96fe9d5",
-    "numero" : 104,
-    "tipologia" : "Frecciargento",
-    "capienzaTotale" : 85,
-    "wifiDisponibile" : false,
-    "preseElettriche" : true,
-    "ariaCondizionata" : true,
-    "serviziRistorazione" : "Snack, Bevande",
-    "accessibileDisabili" : true,
-    "nomeCommerciale" : "Frecciargento 104"
-  },
-  "prezzi" : {
-    "ARGENTO" : {
-      "intero" : 48.94044679162868,
-      "promozione" : 39.152357433302946,
-      "fedelta" : 29.364268074977208
-    },
-    "GOLD" : {
-      "intero" : 37.87071868856107,
-      "promozione" : 30.296574950848857,
-      "fedelta" : 22.72243121313664
-    },
-    "BASE" : {
-      "intero" : 26.205085540747724,
-      "promozione" : 20.964068432598182,
-      "fedelta" : 15.723051324448633
-    }
-  }
-}, {
   "id" : "e84d04cc-833a-48ed-a8de-43dd15808bf1",
   "stazionePartenza" : "ReggioCalabria",
   "stazioneArrivo" : "Milano",
@@ -896,6 +716,42 @@
       "intero" : 29.8389635921245,
       "promozione" : 23.8711708736996,
       "fedelta" : 17.903378155274698
+    }
+  }
+}, {
+  "id" : "a154caee-e920-48bc-8705-67a85715cd09",
+  "stazionePartenza" : "Torino",
+  "stazioneArrivo" : "Strongoli",
+  "data" : "2025-06-04",
+  "ora" : "20:00:00",
+  "binario" : 7,
+  "treno" : {
+    "id" : "a2f1139c-7ef9-4147-9eb5-0b4bb96fe9d5",
+    "numero" : 104,
+    "tipologia" : "Frecciargento",
+    "capienzaTotale" : 85,
+    "wifiDisponibile" : false,
+    "preseElettriche" : true,
+    "ariaCondizionata" : true,
+    "serviziRistorazione" : "Snack, Bevande",
+    "accessibileDisabili" : true,
+    "nomeCommerciale" : "Frecciargento 104"
+  },
+  "prezzi" : {
+    "ARGENTO" : {
+      "intero" : 48.94044679162868,
+      "promozione" : 39.152357433302946,
+      "fedelta" : 29.364268074977208
+    },
+    "GOLD" : {
+      "intero" : 37.87071868856107,
+      "promozione" : 30.296574950848857,
+      "fedelta" : 22.72243121313664
+    },
+    "BASE" : {
+      "intero" : 26.205085540747724,
+      "promozione" : 20.964068432598182,
+      "fedelta" : 15.723051324448633
     }
   }
 } ]

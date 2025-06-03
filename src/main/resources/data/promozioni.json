@@ -1,1 +1,6 @@
-[]
+[ {
+  "descrizione" : "simi",
+  "sconto" : 0.2,
+  "dataInizio" : "2025-06-02",
+  "dataFine" : "2025-06-08"
+} ]
